@@ -443,6 +443,9 @@
   const downloadLink = el('downloadLink');
   const audioPlayer = el('audioPlayer');
   const audioCapture = el('audioCapture');
+  audioPlayer.muted = false;
+  audioPlayer.volume = 1.0;
+  audioPlayer.preload = 'auto';
 
   // ---------------------------------------------------------------
   // FETCH HELPERS
@@ -1053,6 +1056,7 @@
 
   function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
 
+  let audioUnlocked = false;
   function playOnce(el, url){
     return new Promise((resolve)=>{
       let done = false;
@@ -1063,24 +1067,57 @@
       };
       el.addEventListener('ended', finish, {once:true});
       el.addEventListener('error', finish, {once:true});
-      el.src = url;
-      el.currentTime = 0;
-      el.play().catch(finish);
+      try{
+        el.src = url;
+        el.load();
+        const p = el.play();
+        if(p && typeof p.catch === 'function'){
+          p.then(()=>{ audioUnlocked = true; })
+           .catch((err)=>{
+              console.warn('Lecture audio refusée par le navigateur:', err && err.name);
+              if(err && err.name === 'NotAllowedError'){ showUnlockPrompt(); }
+              finish();
+            });
+        } else {
+          audioUnlocked = true;
+        }
+      }catch(err){
+        console.error('Erreur lors du lancement de la lecture audio:', err);
+        finish();
+      }
       setTimeout(()=>{ if(!done) finish(); }, 25000);
     });
   }
+
+  // Certains navigateurs (surtout mobile/Safari) bloquent la lecture tant
+  // qu'ils n'ont pas vu un vrai tap direct sur un contrôle audio. Si on
+  // détecte ce blocage, on affiche un bouton explicite pour débloquer le son.
+  const unlockBtn = document.createElement('button');
+  unlockBtn.textContent = '🔊 Activer le son puis continuer';
+  unlockBtn.className = 'primary';
+  unlockBtn.style.cssText = 'display:none;position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:50;';
+  document.body.appendChild(unlockBtn);
+  function showUnlockPrompt(){
+    if(audioUnlocked) return;
+    unlockBtn.style.display = 'flex';
+  }
+  unlockBtn.addEventListener('click', ()=>{
+    audioPlayer.muted = false;
+    audioPlayer.play().then(()=>{ audioUnlocked = true; }).catch(()=>{});
+    unlockBtn.style.display = 'none';
+  });
 
   async function playAyah(globalNumber, verseText){
     const url = audioUrlFor(globalNumber);
 
     // best-effort: feed the capture graph in parallel while recording
     if(state.isRecording && graphReady){
-      audioCapture.src = url;
-      audioCapture.currentTime = 0;
-      audioCapture.play().catch(()=>{});
+      try{
+        audioCapture.src = url;
+        audioCapture.play().catch(()=>{});
+      }catch(e){ /* export will just be silent for this ayah */ }
     }
 
-    audioPlayer.error && audioPlayer.removeAttribute('src'); // clear stale error state
     await playOnce(audioPlayer, url);
     if(audioPlayer.error){
       // one retry in case of a transient network hiccup
