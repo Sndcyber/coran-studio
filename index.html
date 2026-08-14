@@ -172,6 +172,28 @@
   .seg.wrap{ grid-auto-flow:row; grid-template-columns:1fr 1fr; }
   .seg.wrap button{ font-size:11px; padding:10px 4px; line-height:1.3; }
 
+  .chip-row{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  .chip{
+    background:var(--ink-2); border:1px solid var(--line); color:var(--text-muted);
+    font-family:inherit; font-size:11px; font-weight:600; padding:6px 11px;
+    border-radius:20px; cursor:pointer; transition:all .15s ease;
+  }
+  .chip.active{ background:var(--gold); border-color:var(--gold); color:var(--ink); }
+  .chip:hover:not(.active){ border-color:var(--gold); color:var(--gold-light); }
+
+  .reciter-list{ max-height:230px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding-right:2px; }
+  .reciter-item{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    background:var(--ink-2); border:1px solid var(--line); border-radius:9px;
+    padding:9px 12px; cursor:pointer; transition:all .15s ease;
+  }
+  .reciter-item:hover{ border-color:var(--gold); }
+  .reciter-item.active{ border-color:var(--gold); box-shadow:0 0 0 1px var(--gold) inset; background:rgba(201,162,75,0.08); }
+  .reciter-item .rname{ font-size:12.5px; font-weight:600; color:var(--text-light); }
+  .reciter-item .rtags{ font-size:10px; color:var(--text-muted); margin-top:2px; }
+  .reciter-item .rcheck{ width:16px; height:16px; border-radius:50%; border:1.5px solid var(--line); flex-shrink:0; }
+  .reciter-item.active .rcheck{ background:var(--gold); border-color:var(--gold); }
+
   .rec-indicator{
     position:absolute; top:14px; left:14px; display:none;
     align-items:center; gap:7px; background:rgba(0,0,0,0.55); backdrop-filter:blur(4px);
@@ -264,10 +286,11 @@
 
     <div class="group">
       <div class="group-title"><span class="dash"></span>Récitateur</div>
-      <label class="field">
-        <span class="lbl">Voix</span>
-        <select id="reciterSelect"><option>Chargement…</option></select>
-      </label>
+      <input type="text" id="reciterSearch" placeholder="Rechercher un récitateur…" style="margin-bottom:9px;">
+      <div class="chip-row" id="reciterChips"></div>
+      <div class="reciter-list" id="reciterList">
+        <div class="hint">Vérification des voix disponibles…</div>
+      </div>
     </div>
 
     <div class="group">
@@ -393,6 +416,44 @@
     { type:'video', label:'Désert, nuages en accéléré',
       url:'https://assets.mixkit.co/videos/4048/4048-720.mp4',
       thumb:'https://assets.mixkit.co/videos/4048/4048-thumb-360-0.jpg' },
+    { type:'video', label:'Chat joue avec une balle',
+      url:'https://assets.mixkit.co/videos/6915/6915-720.mp4',
+      thumb:'https://assets.mixkit.co/videos/6915/6915-thumb-720-0.jpg' },
+    { type:'video', label:'Chat câliné par son propriétaire',
+      url:'https://assets.mixkit.co/videos/1779/1779-720.mp4',
+      thumb:'https://assets.mixkit.co/videos/1779/1779-thumb-720-0.jpg' },
+  ];
+
+  // Récitateurs candidats — vérifiés automatiquement au chargement de la
+  // page (certains identifiants ne sont pas réellement servis par le CDN
+  // à ce niveau de qualité ; on ne garde que ceux qui répondent vraiment).
+  const RECITER_CANDIDATES = [
+    { id:'ar.alafasy', name:'Mishary Rashid Alafasy', tags:['populaire','voix-douce','rythme-moyen'] },
+    { id:'ar.abdulbasitmurattal', name:'Abdul Basit (Murattal)', tags:['classique','voix-puissante','rythme-lent'] },
+    { id:'ar.abdurrahmaansudais', name:'Abdur-Rahman As-Sudais', tags:['populaire','voix-puissante','rythme-moyen'] },
+    { id:'ar.saoodshuraym', name:'Saud Al-Shuraim', tags:['voix-puissante','rythme-moyen'] },
+    { id:'ar.husary', name:'Mahmoud Khalil Al-Husary', tags:['classique','rythme-lent'] },
+    { id:'ar.husarymujawwad', name:'Al-Husary (Mujawwad)', tags:['classique','rythme-lent'] },
+    { id:'ar.minshawi', name:'Mohamed Al-Minshawi (Murattal)', tags:['voix-douce','rythme-moyen'] },
+    { id:'ar.minshawimujawwad', name:'Al-Minshawi (Mujawwad)', tags:['voix-douce','rythme-lent'] },
+    { id:'ar.hudhaify', name:'Ali Al-Hudhaify', tags:['rythme-rapide'] },
+    { id:'ar.mahermuaiqly', name:'Maher Al Muaiqly', tags:['populaire','voix-douce','rythme-moyen'] },
+    { id:'ar.shaatree', name:'Abu Bakr Al-Shatri', tags:['voix-douce','rythme-moyen'] },
+    { id:'ar.ahmedajamy', name:'Ahmed Al-Ajamy', tags:['rythme-rapide'] },
+    { id:'ar.hanirifai', name:'Hani Rifai', tags:['voix-douce','rythme-lent'] },
+    { id:'ar.muhammadayyoub', name:'Muhammad Ayyoub', tags:['rythme-moyen'] },
+    { id:'ar.muhammadjibreel', name:'Muhammad Jibreel', tags:['rythme-moyen'] },
+    { id:'ar.parhizgar', name:'Shahriar Parhizgar', tags:['voix-douce','rythme-lent'] },
+  ];
+
+  const RECITER_TAGS = [
+    { key:'all', label:'Tous' },
+    { key:'populaire', label:'Populaire' },
+    { key:'voix-douce', label:'Voix douce' },
+    { key:'voix-puissante', label:'Voix puissante' },
+    { key:'rythme-lent', label:'Lent' },
+    { key:'rythme-rapide', label:'Rapide' },
+    { key:'classique', label:'Classique' },
   ];
 
   // ---------------------------------------------------------------
@@ -405,6 +466,7 @@
     fromAyah: 1,
     toAyah: 7,
     reciter: null,
+    reciters: [],
     translation: null,
     showTranslation: true,
     bgMode: 'gradient',
@@ -425,7 +487,9 @@
   const fromAyahInput = el('fromAyah');
   const toAyahInput = el('toAyah');
   const rangeHint = el('rangeHint');
-  const reciterSelect = el('reciterSelect');
+  const reciterSearch = el('reciterSearch');
+  const reciterChips = el('reciterChips');
+  const reciterList = el('reciterList');
   const translationSelect = el('translationSelect');
   const showTranslationChk = el('showTranslation');
   const canvas = el('stageCanvas');
@@ -473,27 +537,94 @@
     }
   }
 
-  async function loadReciters(){
-    try{
-      const data = await fetchJSON(`${API}/edition?format=audio&language=ar`);
-      const preferred = ['ar.alafasy','ar.abdulbasitmurattal','ar.abdurrahmaansudais','ar.minshawi','ar.mahermuaiqly','ar.husary','ar.hudhaify','ar.shaatree'];
-      data.sort((a,b)=>{
-        const ia = preferred.indexOf(a.identifier), ib = preferred.indexOf(b.identifier);
-        if(ia!==-1 && ib!==-1) return ia-ib;
-        if(ia!==-1) return -1;
-        if(ib!==-1) return 1;
-        return a.englishName.localeCompare(b.englishName);
-      });
-      reciterSelect.innerHTML = data.map(r =>
-        `<option value="${r.identifier}">${r.englishName}</option>`
-      ).join('');
-      state.reciter = data[0].identifier;
-    }catch(e){
-      reciterSelect.innerHTML = '<option value="ar.alafasy">Mishary Rashid Alafasy</option>';
-      state.reciter = 'ar.alafasy';
-      console.error(e);
-    }
+  // ---------------------------------------------------------------
+  // RECITERS — verify each candidate actually has a working audio
+  // file on the CDN before offering it, so no dead voice is listed.
+  // ---------------------------------------------------------------
+  let reciterActiveTag = 'all';
+  let reciterSearchTerm = '';
+
+  function verifyReciter(candidate){
+    return new Promise((resolve)=>{
+      const testUrl = `${AUDIO_CDN}/${candidate.id}/1.mp3`;
+      const probe = new Audio();
+      probe.preload = 'metadata';
+      let done = false;
+      const finish = (ok)=>{
+        if(done) return; done = true;
+        probe.removeEventListener('loadedmetadata', onOk);
+        probe.removeEventListener('error', onFail);
+        resolve(ok);
+      };
+      const onOk = ()=> finish(true);
+      const onFail = ()=> finish(false);
+      probe.addEventListener('loadedmetadata', onOk, {once:true});
+      probe.addEventListener('error', onFail, {once:true});
+      probe.src = testUrl;
+      setTimeout(()=> finish(false), 6000);
+    });
   }
+
+  async function loadReciters(){
+    const results = await Promise.all(RECITER_CANDIDATES.map(async (c)=>{
+      const ok = await verifyReciter(c);
+      return {...c, available: ok};
+    }));
+    let working = results.filter(r => r.available);
+    // safety net: if the verification pass itself failed for some reason
+    // (e.g. blocked network), fall back to the full list rather than empty
+    if(working.length === 0) working = results;
+    state.reciters = working;
+    state.reciter = working[0].id;
+    renderReciterChips();
+    renderReciterList();
+  }
+
+  function renderReciterChips(){
+    reciterChips.innerHTML = RECITER_TAGS.map(t =>
+      `<button class="chip${t.key===reciterActiveTag?' active':''}" data-tag="${t.key}">${t.label}</button>`
+    ).join('');
+  }
+
+  function renderReciterList(){
+    let list = state.reciters || [];
+    if(reciterActiveTag !== 'all') list = list.filter(r => r.tags.includes(reciterActiveTag));
+    if(reciterSearchTerm){
+      const q = reciterSearchTerm.toLowerCase();
+      list = list.filter(r => r.name.toLowerCase().includes(q));
+    }
+    if(list.length === 0){
+      reciterList.innerHTML = '<div class="hint">Aucune voix ne correspond — essayez un autre filtre.</div>';
+      return;
+    }
+    reciterList.innerHTML = list.map(r => `
+      <div class="reciter-item${r.id===state.reciter?' active':''}" data-id="${r.id}">
+        <div>
+          <div class="rname">${r.name}</div>
+          <div class="rtags">${r.tags.map(t => RECITER_TAGS.find(x=>x.key===t)?.label || t).join(' · ')}</div>
+        </div>
+        <div class="rcheck"></div>
+      </div>
+    `).join('');
+  }
+
+  reciterChips.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.chip'); if(!btn) return;
+    reciterActiveTag = btn.dataset.tag;
+    renderReciterChips();
+    renderReciterList();
+  });
+
+  reciterSearch.addEventListener('input', ()=>{
+    reciterSearchTerm = reciterSearch.value.trim();
+    renderReciterList();
+  });
+
+  reciterList.addEventListener('click', (e)=>{
+    const item = e.target.closest('.reciter-item'); if(!item) return;
+    state.reciter = item.dataset.id;
+    renderReciterList();
+  });
 
   async function loadTranslations(){
     try{
@@ -1244,8 +1375,7 @@
   surahSelect.addEventListener('change', onSurahChange);
   fromAyahInput.addEventListener('input', debounceLoadVerses);
   toAyahInput.addEventListener('input', debounceLoadVerses);
-  reciterSelect.addEventListener('change', ()=>{ state.reciter = reciterSelect.value; });
-  translationSelect.addEventListener('change', ()=>{ state.translation = translationSelect.value; loadVerses(); });
+    translationSelect.addEventListener('change', ()=>{ state.translation = translationSelect.value; loadVerses(); });
   showTranslationChk.addEventListener('change', ()=>{ state.showTranslation = showTranslationChk.checked; });
 
   // ---------------------------------------------------------------
