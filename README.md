@@ -8,7 +8,7 @@ export) se fait dans le navigateur de la personne qui utilise le site.
 ## Option A — Le plus rapide (glisser-déposer, sans compte Git)
 
 1. Allez sur https://vercel.com/new
-2. En bas de la page, choisissez "Deploy without Git" / glissez le
+2. En bas de la page, choisissez "Deploy without Git" / glisse   z le
    dossier `quran-studio-vercel` (celui qui contient `index.html`)
 3. Vercel détecte un site statique automatiquement → cliquez "Deploy"
 4. Votre site est en ligne en quelques secondes, avec une URL du type
