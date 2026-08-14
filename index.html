@@ -6,7 +6,7 @@
 <title>Quran Studio — Créez vos vidéos coraniques</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Scheherazade+New:wght@400;700&family=Reem+Kufi:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&family=Manrope:wght@400;500;600;700;800&family=Lora:wght@400;600;700&family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#0c2622;
@@ -135,6 +135,20 @@
 
   .checkline{ display:flex; align-items:center; gap:9px; font-size:12.5px; color:var(--text-muted); cursor:pointer; user-select:none;}
   .checkline input{ accent-color:var(--gold); width:15px; height:15px; }
+
+  .color-row{ display:flex; align-items:center; gap:10px; }
+  input[type=color]{
+    width:36px; height:36px; padding:0; border:1px solid var(--line); border-radius:8px;
+    background:var(--ink-2); cursor:pointer;
+  }
+  input[type=color]::-webkit-color-swatch-wrapper{ padding:3px; }
+  input[type=color]::-webkit-color-swatch{ border:none; border-radius:5px; }
+
+  input[type=range]{
+    width:100%; accent-color:var(--gold); height:4px; cursor:pointer;
+  }
+  .range-row{ display:flex; align-items:center; gap:10px; }
+  .range-row span{ font-size:11.5px; color:var(--gold-light); font-weight:700; min-width:34px; text-align:right; }
 
   /* ---------- stage ---------- */
   .stage{
@@ -300,6 +314,47 @@
         <select id="translationSelect"><option>Chargement…</option></select>
       </label>
       <label class="checkline"><input type="checkbox" id="showTranslation" checked> Afficher la traduction à l'écran</label>
+    </div>
+
+    <div class="group">
+      <div class="group-title"><span class="dash"></span>Texte</div>
+
+      <label class="field">
+        <span class="lbl">Police du verset (arabe)</span>
+        <select id="arabicFontSelect">
+          <option value="Amiri">Amiri — classique</option>
+          <option value="Scheherazade New">Scheherazade — traditionnelle</option>
+          <option value="Noto Naskh Arabic">Noto Naskh — très lisible</option>
+          <option value="Reem Kufi">Reem Kufi — moderne</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span class="lbl">Police de la traduction</span>
+        <select id="translationFontSelect">
+          <option value="Manrope">Manrope — par défaut</option>
+          <option value="Lora">Lora — serif élégant</option>
+          <option value="Poppins">Poppins — rond, moderne</option>
+          <option value="Inter">Inter — neutre</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span class="lbl">Couleurs du texte</span>
+        <div class="color-row">
+          <input type="color" id="arabicColorInput" value="#f5f1e6" title="Couleur du verset arabe">
+          <input type="color" id="translationColorInput" value="#cfe3dc" title="Couleur de la traduction">
+          <input type="color" id="accentColorInput" value="#c9a24b" title="Couleur d'accent (badge, ornements)">
+        </div>
+      </label>
+
+      <label class="field">
+        <span class="lbl">Taille du texte</span>
+        <div class="range-row">
+          <input type="range" id="textScaleInput" min="0.7" max="1.4" step="0.05" value="1">
+          <span id="textScaleValue">100%</span>
+        </div>
+      </label>
     </div>
 
     <div class="group">
@@ -469,6 +524,12 @@
     reciters: [],
     translation: null,
     showTranslation: true,
+    arabicFont: 'Amiri',
+    translationFont: 'Manrope',
+    arabicColor: '#f5f1e6',
+    translationColor: '#cfe3dc',
+    accentColor: '#c9a24b',
+    textScale: 1,
     bgMode: 'gradient',
     imageEl: null,
     videoEl: null,
@@ -1026,7 +1087,7 @@
     let size = startSize;
     let lines;
     do{
-      lines = wrapText(text, `${weight} ${size}px ${family}`, maxWidth);
+      lines = wrapText(text, `${weight} ${size}px "${family}"`, maxWidth);
       if(lines.length <= maxLines) break;
       size -= 4;
     } while(size > minSize);
@@ -1074,18 +1135,20 @@
     // Arabic verse
     ctx.direction = 'rtl';
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#f5f1e6';
-    const arFit = fitText(verse.arabic, 'Amiri', 700, maxTextWidth, 7, Math.round(w*0.084), Math.round(w*0.04));
+    ctx.fillStyle = state.arabicColor;
+    const arFit = fitText(verse.arabic, state.arabicFont, 700, maxTextWidth, 7,
+      Math.round(w*0.084*state.textScale), Math.round(w*0.04*state.textScale));
     let totalBlockH = arFit.lines.length * arFit.size * 1.5;
     let transFit = null;
     if(state.showTranslation && verse.translation){
-      transFit = fitText(verse.translation, 'Manrope', 500, maxTextWidth, 5, Math.round(w*0.036), Math.round(w*0.024));
+      transFit = fitText(verse.translation, state.translationFont, 500, maxTextWidth, 5,
+        Math.round(w*0.036*state.textScale), Math.round(w*0.024*state.textScale));
       totalBlockH += 26 + transFit.lines.length * transFit.size * 1.45;
     }
 
     let cy = h/2 - totalBlockH/2;
 
-    ctx.font = `700 ${arFit.size}px Amiri`;
+    ctx.font = `700 ${arFit.size}px "${state.arabicFont}"`;
     ctx.direction = 'rtl';
     for(const line of arFit.lines){
       cy += arFit.size*1.5;
@@ -1095,8 +1158,8 @@
     if(transFit){
       cy += 30;
       ctx.direction = 'ltr';
-      ctx.font = `500 ${transFit.size}px Manrope`;
-      ctx.fillStyle = '#cfe3dc';
+      ctx.font = `500 ${transFit.size}px "${state.translationFont}"`;
+      ctx.fillStyle = state.translationColor;
       for(const line of transFit.lines){
         cy += transFit.size*1.45;
         ctx.fillText(line, cx, cy);
@@ -1106,27 +1169,27 @@
 
     // badge: surah:ayah
     const badgeText = `${s.englishName} · ${verse.numberInSurah}/${s.numberOfAyahs}`;
-    ctx.font = `700 ${Math.round(w*0.03)}px Manrope`;
+    ctx.font = `700 ${Math.round(w*0.03)}px "${state.translationFont}"`;
     const bw = ctx.measureText(badgeText).width + 34;
     const bh = Math.round(w*0.03) + 20;
     const by = h - bh - Math.round(h*0.055);
     roundRect(cx-bw/2, by, bw, bh, bh/2);
     ctx.fillStyle = 'rgba(12,38,34,0.55)';
     ctx.fill();
-    ctx.strokeStyle = '#c9a24b';
+    ctx.strokeStyle = state.accentColor;
     ctx.lineWidth = 1.2;
     ctx.stroke();
-    ctx.fillStyle = '#e6cb84';
+    ctx.fillStyle = state.accentColor;
     ctx.textAlign = 'center';
     ctx.fillText(badgeText, cx, by + bh/2 + Math.round(w*0.03)*0.34);
     ctx.restore(); // end crossfade block
 
     // corner ornaments baked into export
-    drawStar(w*0.09, h*0.065, w*0.045, t/9000, '#c9a24b', 0.85, 2);
-    drawStar(w*0.91, h*0.065, w*0.045, -t/9000, '#c9a24b', 0.85, 2);
+    drawStar(w*0.09, h*0.065, w*0.045, t/9000, state.accentColor, 0.85, 2);
+    drawStar(w*0.91, h*0.065, w*0.045, -t/9000, state.accentColor, 0.85, 2);
 
     // brand watermark
-    ctx.font = `700 ${Math.round(w*0.024)}px Manrope`;
+    ctx.font = `700 ${Math.round(w*0.024)}px "${state.translationFont}"`;
     ctx.fillStyle = 'rgba(245,241,230,0.55)';
     ctx.textAlign = 'left';
     ctx.fillText('Quran Studio', w*0.055, h*0.965);
@@ -1377,6 +1440,24 @@
   toAyahInput.addEventListener('input', debounceLoadVerses);
     translationSelect.addEventListener('change', ()=>{ state.translation = translationSelect.value; loadVerses(); });
   showTranslationChk.addEventListener('change', ()=>{ state.showTranslation = showTranslationChk.checked; });
+
+  const arabicFontSelect = el('arabicFontSelect');
+  const translationFontSelect = el('translationFontSelect');
+  const arabicColorInput = el('arabicColorInput');
+  const translationColorInput = el('translationColorInput');
+  const accentColorInput = el('accentColorInput');
+  const textScaleInput = el('textScaleInput');
+  const textScaleValue = el('textScaleValue');
+
+  arabicFontSelect.addEventListener('change', ()=>{ state.arabicFont = arabicFontSelect.value; });
+  translationFontSelect.addEventListener('change', ()=>{ state.translationFont = translationFontSelect.value; });
+  arabicColorInput.addEventListener('input', ()=>{ state.arabicColor = arabicColorInput.value; });
+  translationColorInput.addEventListener('input', ()=>{ state.translationColor = translationColorInput.value; });
+  accentColorInput.addEventListener('input', ()=>{ state.accentColor = accentColorInput.value; });
+  textScaleInput.addEventListener('input', ()=>{
+    state.textScale = parseFloat(textScaleInput.value);
+    textScaleValue.textContent = Math.round(state.textScale * 100) + '%';
+  });
 
   // ---------------------------------------------------------------
   // INIT
