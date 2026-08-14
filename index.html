@@ -156,6 +156,22 @@
     border:1px solid var(--line);
   }
 
+  .lib-title{ font-size:11px; color:var(--text-muted); margin:12px 0 8px; letter-spacing:0.4px; }
+  .lib-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:7px; }
+  .lib-item{
+    position:relative; aspect-ratio:1/1; border-radius:8px; overflow:hidden; cursor:pointer;
+    border:1.5px solid var(--line); background-size:cover; background-position:center; background-color:var(--ink-2);
+  }
+  .lib-item.active{ border-color:var(--gold); box-shadow:0 0 0 1px var(--gold); }
+  .lib-item span{
+    position:absolute; left:0; right:0; bottom:0; font-size:9px; padding:3px 4px;
+    background:linear-gradient(0deg, rgba(0,0,0,0.75), transparent); color:#fff; line-height:1.2;
+  }
+  .lib-item .playicon{ position:absolute; top:4px; right:4px; width:12px; height:12px; opacity:0.9; }
+
+  .seg.wrap{ grid-auto-flow:row; grid-template-columns:1fr 1fr; }
+  .seg.wrap button{ font-size:11px; padding:10px 4px; line-height:1.3; }
+
   .rec-indicator{
     position:absolute; top:14px; left:14px; display:none;
     align-items:center; gap:7px; background:rgba(0,0,0,0.55); backdrop-filter:blur(4px);
@@ -293,13 +309,19 @@
       <label class="filebtn" id="vidFileBtn" style="display:none;">Cliquer pour importer une vidéo (MP4/WebM)
         <input type="file" id="vidFile" accept="video/*">
       </label>
+
+      <div class="lib-title">Bibliothèque — vidéos &amp; images prêtes à l'emploi</div>
+      <div class="lib-grid" id="libGrid"></div>
+      <div class="hint" id="libHint" style="margin-top:8px;"></div>
     </div>
 
     <div class="group">
       <div class="group-title"><span class="dash"></span>Format de sortie</div>
-      <div class="seg" id="formatSeg">
-        <button data-format="9:16" class="active">9:16 · Reels/TikTok</button>
-        <button data-format="1:1">1:1 · Carré</button>
+      <div class="seg wrap" id="formatSeg">
+        <button data-format="9:16" class="active">9:16<br>TikTok / Reels / Shorts</button>
+        <button data-format="16:9">16:9<br>YouTube</button>
+        <button data-format="1:1">1:1<br>Post carré IG/FB</button>
+        <button data-format="4:5">4:5<br>Post portrait IG</button>
       </div>
     </div>
 
@@ -335,7 +357,8 @@
   </div>
 </main>
 
-<audio id="audioPlayer" crossorigin="anonymous" style="display:none;"></audio>
+<audio id="audioPlayer" style="display:none;"></audio>
+<audio id="audioCapture" crossorigin="anonymous" muted style="display:none;"></audio>
 
 <script>
 (function(){
@@ -343,6 +366,34 @@
 
   const API = "https://api.alquran.cloud/v1";
   const AUDIO_CDN = "https://cdn.islamic.network/quran/audio/128";
+
+  // Fonds pré-enregistrés (libres de droits, CDN compatibles CORS)
+  const PRESET_BACKGROUNDS = [
+    { type:'image', label:'Dunes au coucher du soleil',
+      url:'https://images.unsplash.com/photo-1760721459088-1a70d26b8ad1?auto=format&fit=crop&w=1600&q=75',
+      thumb:'https://images.unsplash.com/photo-1760721459088-1a70d26b8ad1?auto=format&fit=crop&w=160&q=50' },
+    { type:'image', label:'Mer calme',
+      url:'https://images.unsplash.com/photo-1491920239164-36aa5a5bd06f?auto=format&fit=crop&w=1600&q=75',
+      thumb:'https://images.unsplash.com/photo-1491920239164-36aa5a5bd06f?auto=format&fit=crop&w=160&q=50' },
+    { type:'image', label:'Ciel étoilé',
+      url:'https://images.unsplash.com/photo-1753561881904-37dee26b7a2d?auto=format&fit=crop&w=1600&q=75',
+      thumb:'https://images.unsplash.com/photo-1753561881904-37dee26b7a2d?auto=format&fit=crop&w=160&q=50' },
+    { type:'image', label:'Forêt lumineuse',
+      url:'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1600&q=75',
+      thumb:'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=160&q=50' },
+    { type:'video', label:'Coucher de soleil sur la mer',
+      url:'https://assets.mixkit.co/videos/4119/4119-720.mp4',
+      thumb:'https://assets.mixkit.co/videos/4119/4119-thumb-360-0.jpg' },
+    { type:'video', label:'Ciel étoilé, lac calme',
+      url:'https://assets.mixkit.co/videos/1704/1704-720.mp4',
+      thumb:'https://assets.mixkit.co/videos/1704/1704-thumb-360-0.jpg' },
+    { type:'video', label:'Dunes du Sahara',
+      url:'https://assets.mixkit.co/videos/4149/4149-720.mp4',
+      thumb:'https://assets.mixkit.co/videos/4149/4149-thumb-360-0.jpg' },
+    { type:'video', label:'Désert, nuages en accéléré',
+      url:'https://assets.mixkit.co/videos/4048/4048-720.mp4',
+      thumb:'https://assets.mixkit.co/videos/4048/4048-thumb-360-0.jpg' },
+  ];
 
   // ---------------------------------------------------------------
   // STATE
@@ -362,9 +413,11 @@
     format: '9:16',
     verses: [],          // [{numberInSurah, globalNumber, arabic, translation}]
     currentVerseIndex: 0,
+    verseChangedAt: 0,    // timestamp for text crossfade
     isRunning: false,     // rAF loop active
     isRecording: false,
     particles: [],
+    activePresetUrl: null,
   };
 
   const el = id => document.getElementById(id);
@@ -389,6 +442,7 @@
   const resultVideo = el('resultVideo');
   const downloadLink = el('downloadLink');
   const audioPlayer = el('audioPlayer');
+  const audioCapture = el('audioCapture');
 
   // ---------------------------------------------------------------
   // FETCH HELPERS
@@ -549,11 +603,10 @@
   bgModeGrid.addEventListener('click', (e)=>{
     const card = e.target.closest('.bgmode');
     if(!card) return;
-    [...bgModeGrid.children].forEach(c=>c.classList.remove('active'));
-    card.classList.add('active');
-    state.bgMode = card.dataset.mode;
-    imgFileBtn.style.display = state.bgMode === 'image' ? 'block' : 'none';
-    vidFileBtn.style.display = state.bgMode === 'video' ? 'block' : 'none';
+    setActiveMode(card.dataset.mode);
+    [...libGrid.children].forEach(c=>c.classList.remove('active'));
+    state.activePresetUrl = null;
+    libHint.textContent = '';
   });
 
   imgFileBtn.addEventListener('click', ()=> imgFile.click());
@@ -566,6 +619,7 @@
     img.src = URL.createObjectURL(f);
     imgFileBtn.textContent = '✓ ' + f.name;
     imgFileBtn.classList.add('filled');
+    state.activePresetUrl = null;
   });
 
   vidFile.addEventListener('change', ()=>{
@@ -577,6 +631,77 @@
     state.videoEl = v;
     vidFileBtn.textContent = '✓ ' + f.name;
     vidFileBtn.classList.add('filled');
+    state.activePresetUrl = null;
+  });
+
+  // ---------------------------------------------------------------
+  // PRESET BACKGROUND LIBRARY
+  // ---------------------------------------------------------------
+  const libGrid = el('libGrid');
+  const libHint = el('libHint');
+
+  function renderLibGrid(){
+    libGrid.innerHTML = PRESET_BACKGROUNDS.map((p, i) => `
+      <div class="lib-item" data-index="${i}" style="background-image:url('${p.thumb}')" title="${p.label}">
+        ${p.type === 'video' ? '<svg class="playicon" viewBox="0 0 24 24"><polygon points="7,5 20,12 7,19" fill="#e6cb84"/></svg>' : ''}
+        <span>${p.label}</span>
+      </div>
+    `).join('');
+  }
+  renderLibGrid();
+
+  function setActiveMode(mode){
+    [...bgModeGrid.children].forEach(c=>c.classList.remove('active'));
+    const target = [...bgModeGrid.children].find(c=>c.dataset.mode===mode);
+    if(target) target.classList.add('active');
+    state.bgMode = mode;
+    imgFileBtn.style.display = mode === 'image' ? 'block' : 'none';
+    vidFileBtn.style.display = mode === 'video' ? 'block' : 'none';
+  }
+
+  libGrid.addEventListener('click', (e)=>{
+    const item = e.target.closest('.lib-item');
+    if(!item) return;
+    const preset = PRESET_BACKGROUNDS[parseInt(item.dataset.index, 10)];
+    if(!preset) return;
+
+    [...libGrid.children].forEach(c=>c.classList.remove('active'));
+    item.classList.add('active');
+    libHint.textContent = 'Chargement du fond…';
+    libHint.className = 'hint';
+    state.activePresetUrl = preset.url;
+
+    if(preset.type === 'image'){
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = ()=>{
+        if(state.activePresetUrl !== preset.url) return; // user picked something else meanwhile
+        state.imageEl = img;
+        setActiveMode('image');
+        libHint.textContent = '';
+      };
+      img.onerror = ()=>{
+        libHint.textContent = "Ce fond n'a pas pu être chargé — essayez-en un autre.";
+        libHint.className = 'hint err';
+      };
+      img.src = preset.url;
+    } else {
+      const v = document.createElement('video');
+      v.crossOrigin = 'anonymous';
+      v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true;
+      v.oncanplay = ()=>{
+        if(state.activePresetUrl !== preset.url) return;
+        state.videoEl = v;
+        setActiveMode('video');
+        libHint.textContent = '';
+      };
+      v.onerror = ()=>{
+        libHint.textContent = "Cette vidéo n'a pas pu être chargée — essayez-en une autre.";
+        libHint.className = 'hint err';
+      };
+      v.src = preset.url;
+      v.play().catch(()=>{});
+    }
   });
 
   // ---------------------------------------------------------------
@@ -590,10 +715,27 @@
     resizeCanvas();
   });
 
+  const FORMAT_SIZES = {
+    '9:16': [720, 1280],   // TikTok / Reels / Shorts
+    '16:9': [1280, 720],   // YouTube
+    '1:1':  [960, 960],    // Post carré Instagram/Facebook
+    '4:5':  [864, 1080],   // Post portrait Instagram
+  };
+
   function resizeCanvas(){
-    if(state.format === '9:16'){ canvas.width = 608; canvas.height = 1080; }
-    else { canvas.width = 900; canvas.height = 900; }
+    const [w, h] = FORMAT_SIZES[state.format] || FORMAT_SIZES['9:16'];
+    canvas.width = w; canvas.height = h;
+    applyDisplaySize();
   }
+
+  // Garde l'aperçu compact à l'écran quelle que soit la résolution interne
+  function applyDisplaySize(){
+    const maxW = 300, maxH = 460;
+    const ratio = Math.min(maxW / canvas.width, maxH / canvas.height, 1);
+    canvas.style.width = Math.round(canvas.width * ratio) + 'px';
+    canvas.style.height = Math.round(canvas.height * ratio) + 'px';
+  }
+  window.addEventListener('resize', applyDisplaySize);
 
   // ---------------------------------------------------------------
   // DRAWING — backgrounds
@@ -786,6 +928,15 @@
     const maxTextWidth = w*0.84;
     const cx = w/2;
 
+    // smooth crossfade whenever the verse changes, instead of an abrupt cut
+    const fadeMs = 480;
+    const fadeAlpha = Math.min(1, (t - state.verseChangedAt) / fadeMs);
+    const eased = 1 - Math.pow(1 - fadeAlpha, 3); // ease-out cubic
+    const liftPx = (1 - eased) * (h * 0.018);
+    ctx.save();
+    ctx.globalAlpha = eased;
+    ctx.translate(0, liftPx);
+
     // Arabic verse
     ctx.direction = 'rtl';
     ctx.textAlign = 'center';
@@ -834,6 +985,7 @@
     ctx.fillStyle = '#e6cb84';
     ctx.textAlign = 'center';
     ctx.fillText(badgeText, cx, by + bh/2 + Math.round(w*0.03)*0.34);
+    ctx.restore(); // end crossfade block
 
     // corner ornaments baked into export
     drawStar(w*0.09, h*0.065, w*0.045, t/9000, '#c9a24b', 0.85, 2);
@@ -869,42 +1021,76 @@
   startLoop();
 
   // ---------------------------------------------------------------
-  // AUDIO GRAPH (Web Audio, built once on first user gesture)
+  // AUDIO — two paths:
+  //  1) audioPlayer: plain native playback, no CORS needed, always
+  //     audible and drives the verse-by-verse timing.
+  //  2) audioCapture: separate hidden element (crossOrigin) routed
+  //     through Web Audio, used ONLY while recording so the exported
+  //     video can include narration. If this fails (host has no CORS
+  //     headers), the export simply ends up silent but the app never
+  //     breaks and the on-screen listening experience is unaffected.
   // ---------------------------------------------------------------
   let audioCtxRef = null, sourceNode = null, destNode = null, graphReady = false;
   function ensureAudioGraph(){
     if(graphReady) return;
-    audioCtxRef = new (window.AudioContext || window.webkitAudioContext)();
-    sourceNode = audioCtxRef.createMediaElementSource(audioPlayer);
-    destNode = audioCtxRef.createMediaStreamDestination();
-    sourceNode.connect(destNode);
-    sourceNode.connect(audioCtxRef.destination);
-    graphReady = true;
+    try{
+      audioCtxRef = new (window.AudioContext || window.webkitAudioContext)();
+      sourceNode = audioCtxRef.createMediaElementSource(audioCapture);
+      destNode = audioCtxRef.createMediaStreamDestination();
+      sourceNode.connect(destNode);
+      graphReady = true;
+    }catch(e){ console.error('Audio graph unavailable, export will be silent', e); }
   }
 
   function audioUrlFor(globalNumber){
     return `${AUDIO_CDN}/${state.reciter}/${globalNumber}.mp3`;
   }
 
-  function playAyah(globalNumber){
+  function estimateDurationMs(arabicText){
+    // fallback pacing if the mp3 truly can't be reached
+    return Math.max(1800, Math.min(9000, arabicText.length * 95));
+  }
+
+  function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+
+  function playOnce(el, url){
     return new Promise((resolve)=>{
       let done = false;
       const finish = ()=>{ if(done) return; done = true; cleanup(); resolve(); };
       const cleanup = ()=>{
-        audioPlayer.removeEventListener('ended', finish);
-        audioPlayer.removeEventListener('error', finish);
+        el.removeEventListener('ended', finish);
+        el.removeEventListener('error', finish);
       };
-      audioPlayer.addEventListener('ended', finish);
-      audioPlayer.addEventListener('error', finish);
-      audioPlayer.src = audioUrlFor(globalNumber);
-      audioPlayer.currentTime = 0;
-      audioPlayer.play().catch(finish);
-      // safety timeout in case metadata never resolves
-      setTimeout(()=>{ if(!done && audioPlayer.ended) finish(); }, 25000);
+      el.addEventListener('ended', finish, {once:true});
+      el.addEventListener('error', finish, {once:true});
+      el.src = url;
+      el.currentTime = 0;
+      el.play().catch(finish);
+      setTimeout(()=>{ if(!done) finish(); }, 25000);
     });
   }
 
-  function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+  async function playAyah(globalNumber, verseText){
+    const url = audioUrlFor(globalNumber);
+
+    // best-effort: feed the capture graph in parallel while recording
+    if(state.isRecording && graphReady){
+      audioCapture.src = url;
+      audioCapture.currentTime = 0;
+      audioCapture.play().catch(()=>{});
+    }
+
+    audioPlayer.error && audioPlayer.removeAttribute('src'); // clear stale error state
+    await playOnce(audioPlayer, url);
+    if(audioPlayer.error){
+      // one retry in case of a transient network hiccup
+      await playOnce(audioPlayer, url);
+    }
+    if(audioPlayer.error){
+      // give up on this ayah's audio, keep pacing natural instead of skipping instantly
+      await sleep(estimateDurationMs(verseText || ''));
+    }
+  }
 
   // ---------------------------------------------------------------
   // RUN THROUGH VERSES (shared by preview + export)
@@ -912,9 +1098,10 @@
   async function runThroughVerses(onStep){
     for(let i=0;i<state.verses.length;i++){
       state.currentVerseIndex = i;
+      state.verseChangedAt = performance.now();
       const v = state.verses[i];
       if(onStep) onStep(i, v);
-      await playAyah(v.globalNumber);
+      await playAyah(v.globalNumber, v.arabic);
     }
   }
 
@@ -923,7 +1110,6 @@
   // ---------------------------------------------------------------
   previewBtn.addEventListener('click', async ()=>{
     if(state.verses.length === 0 || state.isRecording) return;
-    ensureAudioGraph();
     previewBtn.disabled = true; generateBtn.disabled = true;
     progressWrap.style.display = 'block';
     try{
@@ -957,7 +1143,7 @@
   generateBtn.addEventListener('click', async ()=>{
     if(state.verses.length === 0 || state.isRecording) return;
     ensureAudioGraph();
-    if(audioCtxRef.state === 'suspended') await audioCtxRef.resume();
+    if(graphReady && audioCtxRef.state === 'suspended') await audioCtxRef.resume();
 
     state.isRecording = true;
     generateBtn.disabled = true; previewBtn.disabled = true;
@@ -967,9 +1153,13 @@
 
     try{
       const canvasStream = canvas.captureStream(30);
+      const audioTracks = graphReady ? destNode.stream.getAudioTracks() : [];
+      if(!graphReady){
+        progressText.textContent = "Capture audio indisponible — la vidéo sera exportée sans son.";
+      }
       const combined = new MediaStream([
         ...canvasStream.getVideoTracks(),
-        ...destNode.stream.getAudioTracks()
+        ...audioTracks
       ]);
       const mimeType = pickMimeType();
       const recorder = new MediaRecorder(combined, mimeType ? {mimeType} : undefined);
