@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quran Studio — Créez vos vidéos coraniques</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0c2622;
+    --ink-2:#123a33;
+    --ink-3:#184840;
+    --gold:#c9a24b;
+    --gold-light:#e6cb84;
+    --parchment:#f3ead3;
+    --text-light:#f5f1e6;
+    --text-muted:#9db8ae;
+    --rec:#e2483a;
+    --line: rgba(201,162,75,0.22);
+    --radius: 14px;
+    --shadow: 0 20px 60px rgba(0,0,0,0.45);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(1200px 800px at 15% -10%, #133c34 0%, var(--ink) 55%), var(--ink);
+    color:var(--text-light);
+    font-family:'Manrope', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- signature rosette pattern used as texture ---------- */
+  .rosette-bg{
+    position:fixed; inset:0; pointer-events:none; z-index:0; opacity:0.05;
+    background-image: radial-gradient(circle, var(--gold) 1px, transparent 1.4px);
+    background-size: 34px 34px;
+  }
+
+  header{
+    position:relative; z-index:2;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:22px 34px;
+    border-bottom:1px solid var(--line);
+  }
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .brand svg{ width:30px; height:30px; }
+  .brand-text{ display:flex; flex-direction:column; line-height:1.1; }
+  .brand-text b{ font-size:18px; font-weight:800; letter-spacing:0.2px; }
+  .brand-text span{ font-size:11.5px; color:var(--text-muted); letter-spacing:0.6px; text-transform:uppercase; }
+  .header-note{ font-size:12.5px; color:var(--text-muted); max-width:340px; text-align:right; line-height:1.5; }
+
+  main{
+    position:relative; z-index:1;
+    display:grid;
+    grid-template-columns: 380px 1fr;
+    gap:0;
+    align-items:stretch;
+    min-height:calc(100vh - 78px);
+  }
+  @media (max-width:980px){
+    main{ grid-template-columns: 1fr; }
+  }
+
+  /* ---------- control rail ---------- */
+  .rail{
+    border-right:1px solid var(--line);
+    padding:26px 26px 100px;
+    overflow-y:auto;
+    max-height:calc(100vh - 78px);
+  }
+  @media (max-width:980px){ .rail{ max-height:none; border-right:none; border-bottom:1px solid var(--line);} }
+
+  .group{ margin-bottom:30px; }
+  .group-title{
+    display:flex; align-items:center; gap:8px;
+    font-size:11.5px; letter-spacing:1.4px; text-transform:uppercase;
+    color:var(--gold-light); font-weight:700; margin-bottom:13px;
+  }
+  .group-title .dash{ width:16px; height:1px; background:var(--gold); opacity:0.6; }
+
+  label.field{ display:block; margin-bottom:14px; }
+  label.field .lbl{ display:block; font-size:12.5px; color:var(--text-muted); margin-bottom:6px; }
+
+  select, input[type=number], input[type=text]{
+    width:100%;
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    color:var(--text-light);
+    padding:10px 12px;
+    border-radius:9px;
+    font-family:inherit;
+    font-size:13.5px;
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  select:focus, input:focus{ border-color:var(--gold); }
+  select{ appearance:none; -webkit-appearance:none; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%23c9a24b'/></svg>"); background-repeat:no-repeat; background-position:right 12px center; padding-right:30px; }
+
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  .hint{ font-size:11.5px; color:var(--text-muted); margin-top:4px; line-height:1.5; }
+  .hint.warn{ color:var(--gold-light); }
+  .hint.err{ color:var(--rec); }
+
+  .seg{
+    display:grid; grid-auto-flow:column; gap:6px;
+    background:var(--ink-2); border:1px solid var(--line); border-radius:10px; padding:4px;
+  }
+  .seg button{
+    background:transparent; border:none; color:var(--text-muted);
+    padding:8px 6px; border-radius:7px; font-family:inherit; font-size:12.5px; font-weight:600;
+    cursor:pointer; transition:all .15s ease;
+  }
+  .seg button.active{ background:var(--gold); color:var(--ink); }
+
+  .bgmode-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .bgmode{
+    border:1px solid var(--line); background:var(--ink-2); border-radius:10px;
+    padding:10px 8px; text-align:center; cursor:pointer; color:var(--text-muted);
+    font-size:11.5px; font-weight:600; transition:all .15s ease;
+  }
+  .bgmode.active{ border-color:var(--gold); color:var(--gold-light); box-shadow:0 0 0 1px var(--gold) inset; }
+  .bgmode svg{ display:block; margin:0 auto 6px; width:22px; height:22px; opacity:0.85; }
+
+  input[type=file]{ display:none; }
+  .filebtn{
+    display:block; text-align:center; border:1px dashed var(--line); border-radius:10px;
+    padding:12px; font-size:12px; color:var(--text-muted); cursor:pointer; margin-top:8px;
+  }
+  .filebtn:hover{ border-color:var(--gold); color:var(--gold-light); }
+  .filebtn.filled{ border-style:solid; border-color:var(--gold); color:var(--gold-light); }
+
+  .checkline{ display:flex; align-items:center; gap:9px; font-size:12.5px; color:var(--text-muted); cursor:pointer; user-select:none;}
+  .checkline input{ accent-color:var(--gold); width:15px; height:15px; }
+
+  /* ---------- stage ---------- */
+  .stage{
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+    padding:40px 30px 60px;
+    gap:22px;
+  }
+  .frame-wrap{ position:relative; }
+  .frame-wrap::before, .frame-wrap::after{
+    content:''; position:absolute; width:34px; height:34px;
+    border:2px solid var(--gold); opacity:0.75;
+  }
+  .frame-wrap::before{ top:-10px; left:-10px; border-right:none; border-bottom:none; }
+  .frame-wrap::after{ bottom:-10px; right:-10px; border-left:none; border-top:none; }
+
+  canvas#stageCanvas{
+    display:block; border-radius:10px; background:#000;
+    box-shadow:var(--shadow);
+    border:1px solid var(--line);
+  }
+
+  .rec-indicator{
+    position:absolute; top:14px; left:14px; display:none;
+    align-items:center; gap:7px; background:rgba(0,0,0,0.55); backdrop-filter:blur(4px);
+    padding:6px 11px; border-radius:20px; font-size:11.5px; font-weight:700; letter-spacing:0.4px;
+  }
+  .rec-indicator.on{ display:flex; }
+  .rec-dot{ width:8px; height:8px; border-radius:50%; background:var(--rec); animation:pulse 1.1s infinite; }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.25;} }
+
+  .progress-wrap{ width:100%; max-width:400px; }
+  .progress-label{ display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted); margin-bottom:6px; }
+  .progress-bar{ height:5px; border-radius:4px; background:var(--ink-2); overflow:hidden; border:1px solid var(--line); }
+  .progress-fill{ height:100%; width:0%; background:linear-gradient(90deg,var(--gold),var(--gold-light)); transition:width .25s ease; }
+
+  .actions{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+  button.primary{
+    background:linear-gradient(180deg,var(--gold-light),var(--gold));
+    color:var(--ink); border:none; font-weight:800; font-size:14px;
+    padding:14px 26px; border-radius:11px; cursor:pointer; letter-spacing:0.2px;
+    display:flex; align-items:center; gap:9px;
+    box-shadow:0 10px 26px rgba(201,162,75,0.28);
+    transition:transform .12s ease;
+  }
+  button.primary:hover{ transform:translateY(-1px); }
+  button.primary:disabled{ opacity:0.45; cursor:not-allowed; transform:none; }
+  button.secondary{
+    background:transparent; border:1px solid var(--line); color:var(--text-light);
+    font-weight:700; font-size:13.5px; padding:13px 20px; border-radius:11px; cursor:pointer;
+  }
+  button.secondary:hover{ border-color:var(--gold); color:var(--gold-light); }
+  button.secondary:disabled{ opacity:0.4; cursor:not-allowed; }
+
+  .rosette-spin{ animation:spin 12s linear infinite; transform-origin:center; }
+  @keyframes spin{ to{ transform:rotate(360deg);} }
+
+  .result{
+    width:100%; max-width:400px; border:1px solid var(--line); border-radius:12px;
+    padding:16px; background:var(--ink-2); display:none; flex-direction:column; gap:12px;
+  }
+  .result.show{ display:flex; }
+  .result video{ width:100%; border-radius:8px; display:block; background:#000; }
+  .dl-row{ display:flex; gap:10px; }
+  .dl-row a{
+    flex:1; text-align:center; background:var(--gold); color:var(--ink); text-decoration:none;
+    font-weight:800; font-size:13px; padding:11px; border-radius:9px;
+  }
+
+  .verse-loading{ color:var(--text-muted); font-size:12.5px; text-align:center; }
+
+  ::-webkit-scrollbar{ width:9px; }
+  ::-webkit-scrollbar-thumb{ background:var(--ink-3); border-radius:8px; }
+  ::-webkit-scrollbar-track{ background:transparent; }
+</style>
+</head>
+<body>
+<div class="rosette-bg"></div>
+
+<header>
+  <div class="brand">
+    <svg viewBox="0 0 100 100"><g fill="none" stroke="#c9a24b" stroke-width="3">
+      <polygon points="50,6 61,39 96,39 68,60 79,94 50,73 21,94 32,60 4,39 39,39"/>
+    </g></svg>
+    <div class="brand-text"><b>Quran Studio</b><span>Vidéos courtes coraniques</span></div>
+  </div>
+  <div class="header-note">Choisissez vos versets, la voix, la traduction et le décor — puis exportez une vidéo prête pour les réseaux sociaux.</div>
+</header>
+
+<main>
+  <!-- ======================= CONTROL RAIL ======================= -->
+  <div class="rail">
+
+    <div class="group">
+      <div class="group-title"><span class="dash"></span>Source du verset</div>
+      <label class="field">
+        <span class="lbl">Sourate</span>
+        <select id="surahSelect"><option>Chargement…</option></select>
+      </label>
+      <div class="row2">
+        <label class="field">
+          <span class="lbl">Du verset</span>
+          <input type="number" id="fromAyah" min="1" value="1">
+        </label>
+        <label class="field">
+          <span class="lbl">Au verset</span>
+          <input type="number" id="toAyah" min="1" value="1">
+        </label>
+      </div>
+      <div class="hint" id="rangeHint">—</div>
+    </div>
+
+    <div class="group">
+      <div class="group-title"><span class="dash"></span>Récitateur</div>
+      <label class="field">
+        <span class="lbl">Voix</span>
+        <select id="reciterSelect"><option>Chargement…</option></select>
+      </label>
+    </div>
+
+    <div class="group">
+      <div class="group-title"><span class="dash"></span>Traduction</div>
+      <label class="field">
+        <span class="lbl">Langue / édition</span>
+        <select id="translationSelect"><option>Chargement…</option></select>
+      </label>
+      <label class="checkline"><input type="checkbox" id="showTranslation" checked> Afficher la traduction à l'écran</label>
+    </div>
+
+    <div class="group">
+      <div class="group-title"><span class="dash"></span>Décor</div>
+      <div class="bgmode-grid" id="bgModeGrid">
+        <div class="bgmode active" data-mode="gradient">
+          <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="4" fill="#c9a24b" opacity="0.5"/></svg>
+          Dégradé animé
+        </div>
+        <div class="bgmode" data-mode="particles">
+          <svg viewBox="0 0 24 24"><circle cx="7" cy="8" r="1.6" fill="#c9a24b"/><circle cx="15" cy="14" r="1.2" fill="#c9a24b"/><circle cx="12" cy="6" r="1" fill="#c9a24b"/></svg>
+          Particules
+        </div>
+        <div class="bgmode" data-mode="geo">
+          <svg viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 16,13 18,20 12,16 6,20 8,13 2,9 9,9" fill="none" stroke="#c9a24b"/></svg>
+          Motif géométrique
+        </div>
+        <div class="bgmode" data-mode="image">
+          <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2" fill="none" stroke="#c9a24b"/><circle cx="8" cy="10" r="2" fill="#c9a24b"/></svg>
+          Image importée
+        </div>
+        <div class="bgmode" data-mode="video">
+          <svg viewBox="0 0 24 24"><rect x="2" y="5" width="14" height="14" rx="2" fill="none" stroke="#c9a24b"/><polygon points="18,9 22,7 22,17 18,15" fill="#c9a24b"/></svg>
+          Vidéo importée
+        </div>
+      </div>
+      <label class="filebtn" id="imgFileBtn" style="display:none;">Cliquer pour importer une image (JPG/PNG)
+        <input type="file" id="imgFile" accept="image/*">
+      </label>
+      <label class="filebtn" id="vidFileBtn" style="display:none;">Cliquer pour importer une vidéo (MP4/WebM)
+        <input type="file" id="vidFile" accept="video/*">
+      </label>
+    </div>
+
+    <div class="group">
+      <div class="group-title"><span class="dash"></span>Format de sortie</div>
+      <div class="seg" id="formatSeg">
+        <button data-format="9:16" class="active">9:16 · Reels/TikTok</button>
+        <button data-format="1:1">1:1 · Carré</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ======================= STAGE ======================= -->
+  <div class="stage">
+    <div class="frame-wrap">
+      <canvas id="stageCanvas" width="608" height="1080"></canvas>
+      <div class="rec-indicator" id="recIndicator"><span class="rec-dot"></span>ENREGISTREMENT</div>
+    </div>
+
+    <div class="verse-loading" id="verseLoading">Chargement des versets…</div>
+
+    <div class="progress-wrap" id="progressWrap" style="display:none;">
+      <div class="progress-label"><span id="progressText">—</span><span id="progressPct">0%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+
+    <div class="actions">
+      <button class="secondary" id="previewBtn">▶ Écouter l'aperçu</button>
+      <button class="primary" id="generateBtn">
+        <svg width="16" height="16" viewBox="0 0 100 100" class="rosette-spin"><polygon points="50,6 61,39 96,39 68,60 79,94 50,73 21,94 32,60 4,39 39,39" fill="#0c2622"/></svg>
+        Générer &amp; exporter la vidéo
+      </button>
+    </div>
+
+    <div class="result" id="result">
+      <video id="resultVideo" controls></video>
+      <div class="dl-row"><a id="downloadLink" download="quran-studio.webm">⬇ Télécharger la vidéo (.webm)</a></div>
+      <div class="hint">Compatible montage / partage direct. Pour Instagram ou TikTok sur mobile, si le format .webm n'est pas accepté, convertissez-le rapidement en .mp4 avec un outil gratuit (CloudConvert, VLC…).</div>
+    </div>
+  </div>
+</main>
+
+<audio id="audioPlayer" crossorigin="anonymous" style="display:none;"></audio>
+
+<script>
+(function(){
+  "use strict";
+
+  const API = "https://api.alquran.cloud/v1";
+  const AUDIO_CDN = "https://cdn.islamic.network/quran/audio/128";
+
+  // ---------------------------------------------------------------
+  // STATE
+  // ---------------------------------------------------------------
+  const state = {
+    surahs: [],
+    selectedSurah: 1,
+    ayahCount: 7,
+    fromAyah: 1,
+    toAyah: 7,
+    reciter: null,
+    translation: null,
+    showTranslation: true,
+    bgMode: 'gradient',
+    imageEl: null,
+    videoEl: null,
+    format: '9:16',
+    verses: [],          // [{numberInSurah, globalNumber, arabic, translation}]
+    currentVerseIndex: 0,
+    isRunning: false,     // rAF loop active
+    isRecording: false,
+    particles: [],
+  };
+
+  const el = id => document.getElementById(id);
+  const surahSelect = el('surahSelect');
+  const fromAyahInput = el('fromAyah');
+  const toAyahInput = el('toAyah');
+  const rangeHint = el('rangeHint');
+  const reciterSelect = el('reciterSelect');
+  const translationSelect = el('translationSelect');
+  const showTranslationChk = el('showTranslation');
+  const canvas = el('stageCanvas');
+  const ctx = canvas.getContext('2d');
+  const verseLoading = el('verseLoading');
+  const generateBtn = el('generateBtn');
+  const previewBtn = el('previewBtn');
+  const progressWrap = el('progressWrap');
+  const progressText = el('progressText');
+  const progressPct = el('progressPct');
+  const progressFill = el('progressFill');
+  const recIndicator = el('recIndicator');
+  const resultBox = el('result');
+  const resultVideo = el('resultVideo');
+  const downloadLink = el('downloadLink');
+  const audioPlayer = el('audioPlayer');
+
+  // ---------------------------------------------------------------
+  // FETCH HELPERS
+  // ---------------------------------------------------------------
+  async function fetchJSON(url){
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('Réseau: ' + res.status);
+    const json = await res.json();
+    if(json.code && json.code !== 200) throw new Error('API: ' + json.status);
+    return json.data;
+  }
+
+  async function loadSurahs(){
+    try{
+      const data = await fetchJSON(`${API}/surah`);
+      state.surahs = data;
+      surahSelect.innerHTML = data.map(s =>
+        `<option value="${s.number}">${s.number}. ${s.englishName} — ${s.name}</option>`
+      ).join('');
+      surahSelect.value = state.selectedSurah;
+      onSurahChange();
+    }catch(e){
+      surahSelect.innerHTML = '<option>Erreur de chargement</option>';
+      console.error(e);
+    }
+  }
+
+  async function loadReciters(){
+    try{
+      const data = await fetchJSON(`${API}/edition?format=audio&language=ar`);
+      const preferred = ['ar.alafasy','ar.abdulbasitmurattal','ar.abdurrahmaansudais','ar.minshawi','ar.mahermuaiqly','ar.husary','ar.hudhaify','ar.shaatree'];
+      data.sort((a,b)=>{
+        const ia = preferred.indexOf(a.identifier), ib = preferred.indexOf(b.identifier);
+        if(ia!==-1 && ib!==-1) return ia-ib;
+        if(ia!==-1) return -1;
+        if(ib!==-1) return 1;
+        return a.englishName.localeCompare(b.englishName);
+      });
+      reciterSelect.innerHTML = data.map(r =>
+        `<option value="${r.identifier}">${r.englishName}</option>`
+      ).join('');
+      state.reciter = data[0].identifier;
+    }catch(e){
+      reciterSelect.innerHTML = '<option value="ar.alafasy">Mishary Rashid Alafasy</option>';
+      state.reciter = 'ar.alafasy';
+      console.error(e);
+    }
+  }
+
+  async function loadTranslations(){
+    try{
+      const data = await fetchJSON(`${API}/edition?format=text&type=translation`);
+      const priority = ['fr','en','ur','id','tr','es','de','ru','bn'];
+      data.sort((a,b)=>{
+        const ia = priority.indexOf(a.language), ib = priority.indexOf(b.language);
+        if(ia!==-1 && ib!==-1) return ia-ib || a.englishName.localeCompare(b.englishName);
+        if(ia!==-1) return -1;
+        if(ib!==-1) return 1;
+        return a.language.localeCompare(b.language);
+      });
+      translationSelect.innerHTML = data.map(t =>
+        `<option value="${t.identifier}">[${t.language.toUpperCase()}] ${t.englishName || t.name}</option>`
+      ).join('');
+      const fr = data.find(t=>t.identifier==='fr.hamidullah') || data.find(t=>t.language==='fr') || data[0];
+      translationSelect.value = fr.identifier;
+      state.translation = fr.identifier;
+    }catch(e){
+      translationSelect.innerHTML = '<option value="fr.hamidullah">[FR] Hamidullah</option>';
+      state.translation = 'fr.hamidullah';
+      console.error(e);
+    }
+  }
+
+  function onSurahChange(){
+    const s = state.surahs.find(x=>x.number == surahSelect.value);
+    if(!s) return;
+    state.selectedSurah = s.number;
+    state.ayahCount = s.numberOfAyahs;
+    fromAyahInput.max = s.numberOfAyahs;
+    toAyahInput.max = s.numberOfAyahs;
+    fromAyahInput.value = 1;
+    toAyahInput.value = Math.min(5, s.numberOfAyahs);
+    updateRangeHint();
+    loadVerses();
+  }
+
+  function updateRangeHint(){
+    const s = state.surahs.find(x=>x.number == state.selectedSurah);
+    if(!s){ rangeHint.textContent = '—'; return; }
+    const from = clampInt(fromAyahInput.value, 1, s.numberOfAyahs);
+    const to = clampInt(toAyahInput.value, 1, s.numberOfAyahs);
+    const count = Math.max(0, to - from + 1);
+    rangeHint.className = 'hint' + (count > 25 ? ' warn' : '');
+    rangeHint.textContent = `${s.numberOfAyahs} versets dans cette sourate · ${count} sélectionné(s)` +
+      (count > 25 ? ' — vidéo assez longue, pensez à réduire pour un format "short"' : '');
+  }
+
+  function clampInt(v, min, max){
+    v = parseInt(v,10); if(isNaN(v)) v = min;
+    return Math.max(min, Math.min(max, v));
+  }
+
+  // ---------------------------------------------------------------
+  // LOAD VERSES (arabic + translation, zipped)
+  // ---------------------------------------------------------------
+  let loadToken = 0;
+  async function loadVerses(){
+    const myToken = ++loadToken;
+    if(!state.translation) return;
+    verseLoading.style.display = 'block';
+    verseLoading.textContent = 'Chargement des versets…';
+    try{
+      const s = state.surahs.find(x=>x.number == state.selectedSurah);
+      const from = clampInt(fromAyahInput.value, 1, s.numberOfAyahs);
+      const to = clampInt(toAyahInput.value, 1, s.numberOfAyahs);
+      state.fromAyah = from; state.toAyah = to;
+      updateRangeHint();
+
+      const data = await fetchJSON(`${API}/surah/${state.selectedSurah}/editions/quran-uthmani,${state.translation}`);
+      if(myToken !== loadToken) return; // stale
+      const arabicEd = data[0].ayahs;
+      const transEd = data[1].ayahs;
+      const verses = [];
+      for(let i=from-1; i<=to-1 && i<arabicEd.length; i++){
+        verses.push({
+          numberInSurah: arabicEd[i].numberInSurah,
+          globalNumber: arabicEd[i].number,
+          arabic: arabicEd[i].text,
+          translation: transEd[i] ? transEd[i].text : ''
+        });
+      }
+      state.verses = verses;
+      state.currentVerseIndex = 0;
+      verseLoading.style.display = 'none';
+    }catch(e){
+      if(myToken !== loadToken) return;
+      verseLoading.textContent = 'Impossible de charger ces versets — réessayez.';
+      console.error(e);
+    }
+  }
+
+  let debounceTimer = null;
+  function debounceLoadVerses(){
+    updateRangeHint();
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(loadVerses, 450);
+  }
+
+  // ---------------------------------------------------------------
+  // BACKGROUND MODE / UPLOADS
+  // ---------------------------------------------------------------
+  const bgModeGrid = el('bgModeGrid');
+  const imgFileBtn = el('imgFileBtn');
+  const vidFileBtn = el('vidFileBtn');
+  const imgFile = el('imgFile');
+  const vidFile = el('vidFile');
+
+  bgModeGrid.addEventListener('click', (e)=>{
+    const card = e.target.closest('.bgmode');
+    if(!card) return;
+    [...bgModeGrid.children].forEach(c=>c.classList.remove('active'));
+    card.classList.add('active');
+    state.bgMode = card.dataset.mode;
+    imgFileBtn.style.display = state.bgMode === 'image' ? 'block' : 'none';
+    vidFileBtn.style.display = state.bgMode === 'video' ? 'block' : 'none';
+  });
+
+  imgFileBtn.addEventListener('click', ()=> imgFile.click());
+  vidFileBtn.addEventListener('click', ()=> vidFile.click());
+
+  imgFile.addEventListener('change', ()=>{
+    const f = imgFile.files[0]; if(!f) return;
+    const img = new Image();
+    img.onload = ()=>{ state.imageEl = img; };
+    img.src = URL.createObjectURL(f);
+    imgFileBtn.textContent = '✓ ' + f.name;
+    imgFileBtn.classList.add('filled');
+  });
+
+  vidFile.addEventListener('change', ()=>{
+    const f = vidFile.files[0]; if(!f) return;
+    const v = document.createElement('video');
+    v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true;
+    v.src = URL.createObjectURL(f);
+    v.play().catch(()=>{});
+    state.videoEl = v;
+    vidFileBtn.textContent = '✓ ' + f.name;
+    vidFileBtn.classList.add('filled');
+  });
+
+  // ---------------------------------------------------------------
+  // FORMAT TOGGLE
+  // ---------------------------------------------------------------
+  el('formatSeg').addEventListener('click', (e)=>{
+    const btn = e.target.closest('button'); if(!btn) return;
+    [...el('formatSeg').children].forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    state.format = btn.dataset.format;
+    resizeCanvas();
+  });
+
+  function resizeCanvas(){
+    if(state.format === '9:16'){ canvas.width = 608; canvas.height = 1080; }
+    else { canvas.width = 900; canvas.height = 900; }
+  }
+
+  // ---------------------------------------------------------------
+  // DRAWING — backgrounds
+  // ---------------------------------------------------------------
+  function initParticles(){
+    const n = 46;
+    state.particles = Array.from({length:n}, ()=>({
+      x: Math.random(), y: Math.random(),
+      r: 1 + Math.random()*2.4,
+      vy: 0.00006 + Math.random()*0.00012,
+      a: 0.15 + Math.random()*0.5,
+      drift: (Math.random()-0.5)*0.00008
+    }));
+  }
+  initParticles();
+
+  function drawGradientBG(t){
+    const w = canvas.width, h = canvas.height;
+    const hueShift = Math.sin(t/6000) * 10;
+    const g = ctx.createLinearGradient(0,0,w,h);
+    g.addColorStop(0, `hsl(${168+hueShift}, 45%, 12%)`);
+    g.addColorStop(0.55, `hsl(${162+hueShift}, 40%, 8%)`);
+    g.addColorStop(1, `hsl(${42+hueShift}, 35%, 10%)`);
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,w,h);
+
+    // soft diagonal light rays
+    ctx.save();
+    ctx.globalAlpha = 0.06;
+    ctx.strokeStyle = '#e6cb84';
+    for(let i=-2;i<8;i++){
+      ctx.beginPath();
+      const x = (i*160 + (t/60)%160) - 200;
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x - h*0.5, h);
+      ctx.lineWidth = 40;
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawParticlesBG(t){
+    drawGradientBG(t);
+    const w = canvas.width, h = canvas.height;
+    ctx.save();
+    for(const p of state.particles){
+      p.y -= p.vy * 16;
+      p.x += p.drift * 16;
+      if(p.y < -0.02) p.y = 1.02;
+      if(p.x < -0.02) p.x = 1.02;
+      if(p.x > 1.02) p.x = -0.02;
+      ctx.globalAlpha = p.a;
+      ctx.fillStyle = '#e6cb84';
+      ctx.beginPath();
+      ctx.arc(p.x*w, p.y*h, p.r*(w/608), 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawStar(cx, cy, r, rotation, color, alpha, lineWidth){
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(rotation);
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+    for(let i=0;i<8;i++){
+      const a = (Math.PI/4)*i;
+      const x = Math.cos(a)*r, y = Math.sin(a)*r;
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+    ctx.beginPath();
+    for(let i=0;i<8;i++){
+      const a = (Math.PI/4)*i + Math.PI/8;
+      const x = Math.cos(a)*r*0.62, y = Math.sin(a)*r*0.62;
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawGeoBG(t){
+    const w = canvas.width, h = canvas.height;
+    const g = ctx.createLinearGradient(0,0,0,h);
+    g.addColorStop(0, '#0c2622');
+    g.addColorStop(1, '#123a33');
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,w,h);
+
+    const spacing = w/4.2;
+    const rot = t/26000;
+    const offset = (t/220) % spacing;
+    for(let y=-spacing; y<h+spacing; y+=spacing*0.87){
+      for(let x=-spacing; x<w+spacing; x+=spacing){
+        const xx = x + (Math.round(y/spacing)%2===0 ? 0 : spacing/2) + offset*0.2;
+        drawStar(xx, y, spacing*0.42, rot, '#c9a24b', 0.10, 1.4);
+      }
+    }
+  }
+
+  function coverDraw(mediaEl, mediaW, mediaH, t, zoomable){
+    const w = canvas.width, h = canvas.height;
+    if(!mediaW || !mediaH) return;
+    const scale = Math.max(w/mediaW, h/mediaH) * (zoomable ? (1 + Math.min(0.12, t/45000)) : 1);
+    const dw = mediaW*scale, dh = mediaH*scale;
+    const dx = (w-dw)/2, dy = (h-dh)/2;
+    ctx.drawImage(mediaEl, dx, dy, dw, dh);
+  }
+
+  function drawBackground(t){
+    const w = canvas.width, h = canvas.height;
+    if(state.bgMode === 'gradient'){ drawGradientBG(t); return; }
+    if(state.bgMode === 'particles'){ drawParticlesBG(t); return; }
+    if(state.bgMode === 'geo'){ drawGeoBG(t); return; }
+    if(state.bgMode === 'image' && state.imageEl){
+      coverDraw(state.imageEl, state.imageEl.naturalWidth, state.imageEl.naturalHeight, t, true);
+      return;
+    }
+    if(state.bgMode === 'video' && state.videoEl && state.videoEl.videoWidth){
+      coverDraw(state.videoEl, state.videoEl.videoWidth, state.videoEl.videoHeight, t, false);
+      return;
+    }
+    // fallback while asset not ready
+    drawGradientBG(t);
+  }
+
+  // ---------------------------------------------------------------
+  // DRAWING — text
+  // ---------------------------------------------------------------
+  function wrapText(text, font, maxWidth){
+    ctx.font = font;
+    const words = text.split(' ');
+    const lines = [];
+    let line = '';
+    for(const word of words){
+      const test = line ? line + ' ' + word : word;
+      if(ctx.measureText(test).width > maxWidth && line){
+        lines.push(line);
+        line = word;
+      } else {
+        line = test;
+      }
+    }
+    if(line) lines.push(line);
+    return lines;
+  }
+
+  function fitText(text, family, weight, maxWidth, maxLines, startSize, minSize){
+    let size = startSize;
+    let lines;
+    do{
+      lines = wrapText(text, `${weight} ${size}px ${family}`, maxWidth);
+      if(lines.length <= maxLines) break;
+      size -= 4;
+    } while(size > minSize);
+    return {size, lines};
+  }
+
+  function roundRect(x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+
+  function drawForeground(t){
+    const w = canvas.width, h = canvas.height;
+
+    // legibility scrim
+    const scrim = ctx.createLinearGradient(0,0,0,h);
+    scrim.addColorStop(0, 'rgba(6,16,14,0.55)');
+    scrim.addColorStop(0.35, 'rgba(6,16,14,0.15)');
+    scrim.addColorStop(0.65, 'rgba(6,16,14,0.15)');
+    scrim.addColorStop(1, 'rgba(6,16,14,0.72)');
+    ctx.fillStyle = scrim;
+    ctx.fillRect(0,0,w,h);
+
+    const s = state.surahs.find(x=>x.number == state.selectedSurah);
+    const verse = state.verses[state.currentVerseIndex];
+    if(!s || !verse) return;
+
+    const maxTextWidth = w*0.84;
+    const cx = w/2;
+
+    // Arabic verse
+    ctx.direction = 'rtl';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#f5f1e6';
+    const arFit = fitText(verse.arabic, 'Amiri', 700, maxTextWidth, 7, Math.round(w*0.084), Math.round(w*0.04));
+    let totalBlockH = arFit.lines.length * arFit.size * 1.5;
+    let transFit = null;
+    if(state.showTranslation && verse.translation){
+      transFit = fitText(verse.translation, 'Manrope', 500, maxTextWidth, 5, Math.round(w*0.036), Math.round(w*0.024));
+      totalBlockH += 26 + transFit.lines.length * transFit.size * 1.45;
+    }
+
+    let cy = h/2 - totalBlockH/2;
+
+    ctx.font = `700 ${arFit.size}px Amiri`;
+    ctx.direction = 'rtl';
+    for(const line of arFit.lines){
+      cy += arFit.size*1.5;
+      ctx.fillText(line, cx, cy);
+    }
+
+    if(transFit){
+      cy += 30;
+      ctx.direction = 'ltr';
+      ctx.font = `500 ${transFit.size}px Manrope`;
+      ctx.fillStyle = '#cfe3dc';
+      for(const line of transFit.lines){
+        cy += transFit.size*1.45;
+        ctx.fillText(line, cx, cy);
+      }
+    }
+    ctx.direction = 'ltr';
+
+    // badge: surah:ayah
+    const badgeText = `${s.englishName} · ${verse.numberInSurah}/${s.numberOfAyahs}`;
+    ctx.font = `700 ${Math.round(w*0.03)}px Manrope`;
+    const bw = ctx.measureText(badgeText).width + 34;
+    const bh = Math.round(w*0.03) + 20;
+    const by = h - bh - Math.round(h*0.055);
+    roundRect(cx-bw/2, by, bw, bh, bh/2);
+    ctx.fillStyle = 'rgba(12,38,34,0.55)';
+    ctx.fill();
+    ctx.strokeStyle = '#c9a24b';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    ctx.fillStyle = '#e6cb84';
+    ctx.textAlign = 'center';
+    ctx.fillText(badgeText, cx, by + bh/2 + Math.round(w*0.03)*0.34);
+
+    // corner ornaments baked into export
+    drawStar(w*0.09, h*0.065, w*0.045, t/9000, '#c9a24b', 0.85, 2);
+    drawStar(w*0.91, h*0.065, w*0.045, -t/9000, '#c9a24b', 0.85, 2);
+
+    // brand watermark
+    ctx.font = `700 ${Math.round(w*0.024)}px Manrope`;
+    ctx.fillStyle = 'rgba(245,241,230,0.55)';
+    ctx.textAlign = 'left';
+    ctx.fillText('Quran Studio', w*0.055, h*0.965);
+    ctx.textAlign = 'center';
+  }
+
+  // ---------------------------------------------------------------
+  // RENDER LOOP
+  // ---------------------------------------------------------------
+  function renderFrame(t){
+    drawBackground(t);
+    drawForeground(t);
+  }
+
+  function loop(ts){
+    if(!state.isRunning) return;
+    renderFrame(ts);
+    requestAnimationFrame(loop);
+  }
+  function startLoop(){
+    if(state.isRunning) return;
+    state.isRunning = true;
+    requestAnimationFrame(loop);
+  }
+  resizeCanvas();
+  startLoop();
+
+  // ---------------------------------------------------------------
+  // AUDIO GRAPH (Web Audio, built once on first user gesture)
+  // ---------------------------------------------------------------
+  let audioCtxRef = null, sourceNode = null, destNode = null, graphReady = false;
+  function ensureAudioGraph(){
+    if(graphReady) return;
+    audioCtxRef = new (window.AudioContext || window.webkitAudioContext)();
+    sourceNode = audioCtxRef.createMediaElementSource(audioPlayer);
+    destNode = audioCtxRef.createMediaStreamDestination();
+    sourceNode.connect(destNode);
+    sourceNode.connect(audioCtxRef.destination);
+    graphReady = true;
+  }
+
+  function audioUrlFor(globalNumber){
+    return `${AUDIO_CDN}/${state.reciter}/${globalNumber}.mp3`;
+  }
+
+  function playAyah(globalNumber){
+    return new Promise((resolve)=>{
+      let done = false;
+      const finish = ()=>{ if(done) return; done = true; cleanup(); resolve(); };
+      const cleanup = ()=>{
+        audioPlayer.removeEventListener('ended', finish);
+        audioPlayer.removeEventListener('error', finish);
+      };
+      audioPlayer.addEventListener('ended', finish);
+      audioPlayer.addEventListener('error', finish);
+      audioPlayer.src = audioUrlFor(globalNumber);
+      audioPlayer.currentTime = 0;
+      audioPlayer.play().catch(finish);
+      // safety timeout in case metadata never resolves
+      setTimeout(()=>{ if(!done && audioPlayer.ended) finish(); }, 25000);
+    });
+  }
+
+  function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+
+  // ---------------------------------------------------------------
+  // RUN THROUGH VERSES (shared by preview + export)
+  // ---------------------------------------------------------------
+  async function runThroughVerses(onStep){
+    for(let i=0;i<state.verses.length;i++){
+      state.currentVerseIndex = i;
+      const v = state.verses[i];
+      if(onStep) onStep(i, v);
+      await playAyah(v.globalNumber);
+    }
+  }
+
+  // ---------------------------------------------------------------
+  // PREVIEW (audio only, no recording)
+  // ---------------------------------------------------------------
+  previewBtn.addEventListener('click', async ()=>{
+    if(state.verses.length === 0 || state.isRecording) return;
+    ensureAudioGraph();
+    previewBtn.disabled = true; generateBtn.disabled = true;
+    progressWrap.style.display = 'block';
+    try{
+      await runThroughVerses((i,v)=>{
+        progressText.textContent = `Verset ${i+1}/${state.verses.length}`;
+        progressPct.textContent = Math.round(((i)/state.verses.length)*100) + '%';
+        progressFill.style.width = Math.round(((i)/state.verses.length)*100) + '%';
+      });
+      progressFill.style.width = '100%';
+      progressPct.textContent = '100%';
+      progressText.textContent = 'Aperçu terminé';
+    } finally {
+      previewBtn.disabled = false; generateBtn.disabled = false;
+      setTimeout(()=>{ progressWrap.style.display = 'none'; }, 1200);
+    }
+  });
+
+  // ---------------------------------------------------------------
+  // GENERATE & EXPORT VIDEO
+  // ---------------------------------------------------------------
+  function pickMimeType(){
+    const options = [
+      'video/webm;codecs=vp9,opus',
+      'video/webm;codecs=vp8,opus',
+      'video/webm'
+    ];
+    for(const o of options){ if(window.MediaRecorder && MediaRecorder.isTypeSupported(o)) return o; }
+    return '';
+  }
+
+  generateBtn.addEventListener('click', async ()=>{
+    if(state.verses.length === 0 || state.isRecording) return;
+    ensureAudioGraph();
+    if(audioCtxRef.state === 'suspended') await audioCtxRef.resume();
+
+    state.isRecording = true;
+    generateBtn.disabled = true; previewBtn.disabled = true;
+    recIndicator.classList.add('on');
+    resultBox.classList.remove('show');
+    progressWrap.style.display = 'block';
+
+    try{
+      const canvasStream = canvas.captureStream(30);
+      const combined = new MediaStream([
+        ...canvasStream.getVideoTracks(),
+        ...destNode.stream.getAudioTracks()
+      ]);
+      const mimeType = pickMimeType();
+      const recorder = new MediaRecorder(combined, mimeType ? {mimeType} : undefined);
+      const chunks = [];
+      recorder.ondataavailable = (e)=>{ if(e.data && e.data.size) chunks.push(e.data); };
+      const stopped = new Promise(res=>{ recorder.onstop = res; });
+      recorder.start();
+
+      await runThroughVerses((i,v)=>{
+        const pct = Math.round((i/state.verses.length)*100);
+        progressText.textContent = `Enregistrement — verset ${i+1}/${state.verses.length}`;
+        progressPct.textContent = pct + '%';
+        progressFill.style.width = pct + '%';
+      });
+
+      await sleep(400);
+      recorder.stop();
+      await stopped;
+
+      progressFill.style.width = '100%';
+      progressPct.textContent = '100%';
+      progressText.textContent = 'Export terminé';
+
+      const blob = new Blob(chunks, {type: mimeType ? mimeType.split(';')[0] : 'video/webm'});
+      const url = URL.createObjectURL(blob);
+      resultVideo.src = url;
+      downloadLink.href = url;
+      const s = state.surahs.find(x=>x.number == state.selectedSurah);
+      downloadLink.download = `quran-studio-${s ? s.englishName.toLowerCase() : 'sourate'}-${state.fromAyah}-${state.toAyah}.webm`;
+      resultBox.classList.add('show');
+    }catch(e){
+      console.error(e);
+      progressText.textContent = "Erreur pendant l'export — réessayez.";
+    } finally {
+      state.isRecording = false;
+      generateBtn.disabled = false; previewBtn.disabled = false;
+      recIndicator.classList.remove('on');
+      setTimeout(()=>{ progressWrap.style.display = 'none'; }, 1500);
+    }
+  });
+
+  // ---------------------------------------------------------------
+  // EVENTS
+  // ---------------------------------------------------------------
+  surahSelect.addEventListener('change', onSurahChange);
+  fromAyahInput.addEventListener('input', debounceLoadVerses);
+  toAyahInput.addEventListener('input', debounceLoadVerses);
+  reciterSelect.addEventListener('change', ()=>{ state.reciter = reciterSelect.value; });
+  translationSelect.addEventListener('change', ()=>{ state.translation = translationSelect.value; loadVerses(); });
+  showTranslationChk.addEventListener('change', ()=>{ state.showTranslation = showTranslationChk.checked; });
+
+  // ---------------------------------------------------------------
+  // INIT
+  // ---------------------------------------------------------------
+  (async function init(){
+    await loadSurahs();
+    await Promise.all([loadReciters(), loadTranslations()]);
+    loadVerses();
+  })();
+
+})();
+</script>
+</body>
+</html>
