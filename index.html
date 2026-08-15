@@ -349,10 +349,18 @@
       </label>
 
       <label class="field">
-        <span class="lbl">Taille du texte</span>
+        <span class="lbl">Taille du texte arabe</span>
         <div class="range-row">
-          <input type="range" id="textScaleInput" min="0.7" max="1.4" step="0.05" value="1">
-          <span id="textScaleValue">100%</span>
+          <input type="range" id="arabicScaleInput" min="0.6" max="1.6" step="0.05" value="1">
+          <span id="arabicScaleValue">100%</span>
+        </div>
+      </label>
+
+      <label class="field">
+        <span class="lbl">Taille de la traduction</span>
+        <div class="range-row">
+          <input type="range" id="translationScaleInput" min="0.6" max="1.6" step="0.05" value="1">
+          <span id="translationScaleValue">100%</span>
         </div>
       </label>
     </div>
@@ -438,6 +446,7 @@
 <audio id="audioPlayer" style="display:none;"></audio>
 <audio id="audioCapture" crossorigin="anonymous" muted style="display:none;"></audio>
 
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 <script>
 (function(){
   "use strict";
@@ -529,7 +538,8 @@
     arabicColor: '#f5f1e6',
     translationColor: '#cfe3dc',
     accentColor: '#c9a24b',
-    textScale: 1,
+    arabicTextScale: 1,
+    translationTextScale: 1,
     bgMode: 'gradient',
     imageEl: null,
     videoEl: null,
@@ -911,10 +921,10 @@
   });
 
   const FORMAT_SIZES = {
-    '9:16': [720, 1280],   // TikTok / Reels / Shorts
-    '16:9': [1280, 720],   // YouTube
-    '1:1':  [960, 960],    // Post carré Instagram/Facebook
-    '4:5':  [864, 1080],   // Post portrait Instagram
+    '9:16': [1080, 1920],  // TikTok / Reels / Shorts
+    '16:9': [1920, 1080],  // YouTube
+    '1:1':  [1080, 1080],  // Post carré Instagram/Facebook
+    '4:5':  [1080, 1350],  // Post portrait Instagram
   };
 
   function resizeCanvas(){
@@ -1137,12 +1147,12 @@
     ctx.textAlign = 'center';
     ctx.fillStyle = state.arabicColor;
     const arFit = fitText(verse.arabic, state.arabicFont, 700, maxTextWidth, 7,
-      Math.round(w*0.084*state.textScale), Math.round(w*0.04*state.textScale));
+      Math.round(w*0.084*state.arabicTextScale), Math.round(w*0.04*state.arabicTextScale));
     let totalBlockH = arFit.lines.length * arFit.size * 1.5;
     let transFit = null;
     if(state.showTranslation && verse.translation){
       transFit = fitText(verse.translation, state.translationFont, 500, maxTextWidth, 5,
-        Math.round(w*0.036*state.textScale), Math.round(w*0.024*state.textScale));
+        Math.round(w*0.036*state.translationTextScale), Math.round(w*0.024*state.translationTextScale));
       totalBlockH += 26 + transFit.lines.length * transFit.size * 1.45;
     }
 
@@ -1359,16 +1369,58 @@
   });
 
   // ---------------------------------------------------------------
-  // GENERATE & EXPORT VIDEO
+  // GENERATE & EXPORT VIDEO (.mp4, bonne qualité)
   // ---------------------------------------------------------------
   function pickMimeType(){
-    const options = [
+    // On tente d'abord un vrai enregistrement natif en .mp4 (Safari/iOS le
+    // supportent nativement). Si le navigateur ne sait pas, on se rabat sur
+    // .webm puis on convertit en .mp4 via ffmpeg.wasm après l'enregistrement.
+    const mp4Options = [
+      'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+      'video/mp4;codecs=h264,aac',
+      'video/mp4'
+    ];
+    for(const o of mp4Options){ if(window.MediaRecorder && MediaRecorder.isTypeSupported(o)) return {mimeType:o, isMp4:true}; }
+    const webmOptions = [
       'video/webm;codecs=vp9,opus',
       'video/webm;codecs=vp8,opus',
       'video/webm'
     ];
-    for(const o of options){ if(window.MediaRecorder && MediaRecorder.isTypeSupported(o)) return o; }
-    return '';
+    for(const o of webmOptions){ if(window.MediaRecorder && MediaRecorder.isTypeSupported(o)) return {mimeType:o, isMp4:false}; }
+    return {mimeType:'', isMp4:false};
+  }
+
+  // ffmpeg.wasm est chargé eagerly (petit loader) mais son "core" (~25 Mo)
+  // n'est téléchargé que la première fois qu'une conversion est réellement
+  // nécessaire, pour ne pas alourdir le chargement de la page.
+  let ffmpegInstance = null;
+  async function getFfmpeg(){
+    if(ffmpegInstance) return ffmpegInstance;
+    const { createFFmpeg } = FFmpeg;
+    ffmpegInstance = createFFmpeg({
+      log:false,
+      corePath:'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js'
+    });
+    await ffmpegInstance.load();
+    return ffmpegInstance;
+  }
+
+  async function convertWebmToMp4(webmBlob, onProgress){
+    const { fetchFile } = FFmpeg;
+    const ffmpeg = await getFfmpeg();
+    ffmpeg.setProgress(({ratio}) => { if(ratio >= 0 && ratio <= 1) onProgress(ratio); });
+    ffmpeg.FS('writeFile', 'input.webm', await fetchFile(webmBlob));
+    await ffmpeg.run(
+      '-i', 'input.webm',
+      '-c:v', 'libx264', '-preset', 'fast', '-crf', '19', '-pix_fmt', 'yuv420p',
+      '-c:a', 'aac', '-b:a', '160k',
+      '-movflags', '+faststart',
+      'output.mp4'
+    );
+    const data = ffmpeg.FS('readFile', 'output.mp4');
+    ffmpeg.FS('unlink', 'input.webm');
+    ffmpeg.FS('unlink', 'output.mp4');
+    return new Blob([data.buffer], {type:'video/mp4'});
   }
 
   generateBtn.addEventListener('click', async ()=>{
@@ -1392,8 +1444,12 @@
         ...canvasStream.getVideoTracks(),
         ...audioTracks
       ]);
-      const mimeType = pickMimeType();
-      const recorder = new MediaRecorder(combined, mimeType ? {mimeType} : undefined);
+      const { mimeType, isMp4 } = pickMimeType();
+      const recorder = new MediaRecorder(combined, {
+        ...(mimeType ? {mimeType} : {}),
+        videoBitsPerSecond: 8_000_000,   // bonne qualité sur Full HD
+        audioBitsPerSecond: 160_000
+      });
       const chunks = [];
       recorder.ondataavailable = (e)=>{ if(e.data && e.data.size) chunks.push(e.data); };
       const stopped = new Promise(res=>{ recorder.onstop = res; });
@@ -1410,16 +1466,44 @@
       recorder.stop();
       await stopped;
 
-      progressFill.style.width = '100%';
-      progressPct.textContent = '100%';
-      progressText.textContent = 'Export terminé';
+      const rawBlob = new Blob(chunks, {type: mimeType ? mimeType.split(';')[0] : 'video/webm'});
+      let finalBlob = rawBlob;
+      let ext = 'webm';
 
-      const blob = new Blob(chunks, {type: mimeType ? mimeType.split(';')[0] : 'video/webm'});
-      const url = URL.createObjectURL(blob);
+      if(isMp4){
+        finalBlob = rawBlob;
+        ext = 'mp4';
+        progressFill.style.width = '100%';
+        progressPct.textContent = '100%';
+        progressText.textContent = 'Export terminé (.mp4)';
+      } else {
+        // Conversion en .mp4 pour une compatibilité maximale (Instagram/TikTok/YouTube)
+        try{
+          progressText.textContent = 'Conversion en .mp4…';
+          progressFill.style.width = '0%';
+          const mp4Blob = await convertWebmToMp4(rawBlob, (ratio)=>{
+            const pct = Math.round(ratio*100);
+            progressPct.textContent = pct + '%';
+            progressFill.style.width = pct + '%';
+            progressText.textContent = `Conversion en .mp4… ${pct}%`;
+          });
+          finalBlob = mp4Blob;
+          ext = 'mp4';
+          progressText.textContent = 'Export terminé (.mp4)';
+        }catch(convErr){
+          console.error('Conversion mp4 échouée, on garde le .webm', convErr);
+          finalBlob = rawBlob;
+          ext = 'webm';
+          progressText.textContent = "Conversion .mp4 indisponible — export en .webm.";
+        }
+      }
+
+      const url = URL.createObjectURL(finalBlob);
       resultVideo.src = url;
       downloadLink.href = url;
       const s = state.surahs.find(x=>x.number == state.selectedSurah);
-      downloadLink.download = `quran-studio-${s ? s.englishName.toLowerCase() : 'sourate'}-${state.fromAyah}-${state.toAyah}.webm`;
+      downloadLink.download = `quran-studio-${s ? s.englishName.toLowerCase() : 'sourate'}-${state.fromAyah}-${state.toAyah}.${ext}`;
+      downloadLink.textContent = `⬇ Télécharger la vidéo (.${ext})`;
       resultBox.classList.add('show');
     }catch(e){
       console.error(e);
@@ -1446,17 +1530,23 @@
   const arabicColorInput = el('arabicColorInput');
   const translationColorInput = el('translationColorInput');
   const accentColorInput = el('accentColorInput');
-  const textScaleInput = el('textScaleInput');
-  const textScaleValue = el('textScaleValue');
+  const arabicScaleInput = el('arabicScaleInput');
+  const arabicScaleValue = el('arabicScaleValue');
+  const translationScaleInput = el('translationScaleInput');
+  const translationScaleValue = el('translationScaleValue');
 
   arabicFontSelect.addEventListener('change', ()=>{ state.arabicFont = arabicFontSelect.value; });
   translationFontSelect.addEventListener('change', ()=>{ state.translationFont = translationFontSelect.value; });
   arabicColorInput.addEventListener('input', ()=>{ state.arabicColor = arabicColorInput.value; });
   translationColorInput.addEventListener('input', ()=>{ state.translationColor = translationColorInput.value; });
   accentColorInput.addEventListener('input', ()=>{ state.accentColor = accentColorInput.value; });
-  textScaleInput.addEventListener('input', ()=>{
-    state.textScale = parseFloat(textScaleInput.value);
-    textScaleValue.textContent = Math.round(state.textScale * 100) + '%';
+  arabicScaleInput.addEventListener('input', ()=>{
+    state.arabicTextScale = parseFloat(arabicScaleInput.value);
+    arabicScaleValue.textContent = Math.round(state.arabicTextScale * 100) + '%';
+  });
+  translationScaleInput.addEventListener('input', ()=>{
+    state.translationTextScale = parseFloat(translationScaleInput.value);
+    translationScaleValue.textContent = Math.round(state.translationTextScale * 100) + '%';
   });
 
   // ---------------------------------------------------------------
