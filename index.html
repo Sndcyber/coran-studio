@@ -363,6 +363,14 @@
           <span id="translationScaleValue">100%</span>
         </div>
       </label>
+
+      <label class="field">
+        <span class="lbl">Espacement verset / traduction</span>
+        <div class="range-row">
+          <input type="range" id="verseGapInput" min="0" max="3" step="0.1" value="1">
+          <span id="verseGapValue">100%</span>
+        </div>
+      </label>
     </div>
 
     <div class="group">
@@ -540,6 +548,7 @@
     accentColor: '#c9a24b',
     arabicTextScale: 1,
     translationTextScale: 1,
+    verseGap: 1,
     bgMode: 'gradient',
     imageEl: null,
     videoEl: null,
@@ -1148,12 +1157,13 @@
     ctx.fillStyle = state.arabicColor;
     const arFit = fitText(verse.arabic, state.arabicFont, 700, maxTextWidth, 7,
       Math.round(w*0.084*state.arabicTextScale), Math.round(w*0.04*state.arabicTextScale));
+    const gapPx = w*0.028 * state.verseGap;
     let totalBlockH = arFit.lines.length * arFit.size * 1.5;
     let transFit = null;
     if(state.showTranslation && verse.translation){
       transFit = fitText(verse.translation, state.translationFont, 500, maxTextWidth, 5,
         Math.round(w*0.036*state.translationTextScale), Math.round(w*0.024*state.translationTextScale));
-      totalBlockH += 26 + transFit.lines.length * transFit.size * 1.45;
+      totalBlockH += gapPx + transFit.lines.length * transFit.size * 1.45;
     }
 
     let cy = h/2 - totalBlockH/2;
@@ -1166,7 +1176,7 @@
     }
 
     if(transFit){
-      cy += 30;
+      cy += gapPx;
       ctx.direction = 'ltr';
       ctx.font = `500 ${transFit.size}px "${state.translationFont}"`;
       ctx.fillStyle = state.translationColor;
@@ -1547,6 +1557,13 @@
   translationScaleInput.addEventListener('input', ()=>{
     state.translationTextScale = parseFloat(translationScaleInput.value);
     translationScaleValue.textContent = Math.round(state.translationTextScale * 100) + '%';
+  });
+
+  const verseGapInput = el('verseGapInput');
+  const verseGapValue = el('verseGapValue');
+  verseGapInput.addEventListener('input', ()=>{
+    state.verseGap = parseFloat(verseGapInput.value);
+    verseGapValue.textContent = Math.round(state.verseGap * 100) + '%';
   });
 
   // ---------------------------------------------------------------
