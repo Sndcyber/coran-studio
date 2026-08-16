@@ -2109,15 +2109,20 @@
   }
 
   // Fetches and decodes narration audio for capture into the recording.
-  // Returns an AudioBuffer on success, or null if unreachable / no CORS.
-  async function fetchNarrationBuffer(url){
+  // Routed through our own /api/audio-proxy Vercel function, since the
+  // upstream CDN sends no Access-Control-Allow-Origin header — capturing
+  // it directly is blocked by the browser regardless of technique. Going
+  // through our own origin sidesteps CORS entirely.
+  // Returns an AudioBuffer on success, or null if unreachable.
+  async function fetchNarrationBuffer(globalNumber){
     try{
-      const res = await fetch(url, { mode:'cors', cache:'no-store' });
+      const proxyUrl = `/api/audio-proxy?reciter=${encodeURIComponent(state.reciter)}&ayah=${globalNumber}`;
+      const res = await fetch(proxyUrl, { cache:'no-store' });
       if(!res.ok) return null;
       const arrayBuffer = await res.arrayBuffer();
       return await audioCtxRef.decodeAudioData(arrayBuffer);
     }catch(e){
-      console.warn('Capture audio impossible pour cette piste (CORS ou réseau) :', e);
+      console.warn('Capture audio impossible pour cette piste (proxy indisponible ?) :', e);
       return null;
     }
   }
@@ -2230,12 +2235,12 @@
     // lecture audible/native ci-dessous — un réseau lent sur cette requête
     // ne doit jamais retarder ou décaler le rythme réel de la vidéo.
     if(state.isRecording && graphReady){
-      fetchNarrationBuffer(url).then(buffer => {
+      fetchNarrationBuffer(globalNumber).then(buffer => {
         if(buffer){
           playNarrationBuffer(buffer);
         } else if(!narrationCaptureWarned){
           narrationCaptureWarned = true;
-          progressText.textContent = "Capture audio indisponible (CORS du serveur audio) — la vidéo sera exportée sans narration.";
+          progressText.textContent = "Capture audio indisponible (proxy /api/audio-proxy injoignable) — la vidéo sera exportée sans narration.";
         }
       });
     }
