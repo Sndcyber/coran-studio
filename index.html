@@ -6,7 +6,7 @@
 <title>Quran Studio — Créez vos vidéos coraniques</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Scheherazade+New:wght@400;700&family=Reem+Kufi:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&family=Manrope:wght@400;500;600;700;800&family=Lora:wght@400;600;700&family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#0c2622;
@@ -16,6 +16,7 @@
     --gold-light:#e6cb84;
     --parchment:#f3ead3;
     --text-light:#f5f1e6;
+    --text-muted:#8fac a3;
     --text-muted:#9db8ae;
     --rec:#e2483a;
     --line: rgba(201,162,75,0.22);
@@ -136,20 +137,6 @@
   .checkline{ display:flex; align-items:center; gap:9px; font-size:12.5px; color:var(--text-muted); cursor:pointer; user-select:none;}
   .checkline input{ accent-color:var(--gold); width:15px; height:15px; }
 
-  .color-row{ display:flex; align-items:center; gap:10px; }
-  input[type=color]{
-    width:36px; height:36px; padding:0; border:1px solid var(--line); border-radius:8px;
-    background:var(--ink-2); cursor:pointer;
-  }
-  input[type=color]::-webkit-color-swatch-wrapper{ padding:3px; }
-  input[type=color]::-webkit-color-swatch{ border:none; border-radius:5px; }
-
-  input[type=range]{
-    width:100%; accent-color:var(--gold); height:4px; cursor:pointer;
-  }
-  .range-row{ display:flex; align-items:center; gap:10px; }
-  .range-row span{ font-size:11.5px; color:var(--gold-light); font-weight:700; min-width:34px; text-align:right; }
-
   /* ---------- stage ---------- */
   .stage{
     display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
@@ -169,71 +156,6 @@
     box-shadow:var(--shadow);
     border:1px solid var(--line);
   }
-
-  .lib-title{ font-size:11px; color:var(--text-muted); margin:12px 0 8px; letter-spacing:0.4px; }
-  .lib-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:7px; }
-  .lib-item{
-    position:relative; aspect-ratio:1/1; border-radius:8px; overflow:hidden; cursor:pointer;
-    border:1.5px solid var(--line); background-size:cover; background-position:center; background-color:var(--ink-2);
-  }
-  .lib-item.active{ border-color:var(--gold); box-shadow:0 0 0 1px var(--gold); }
-  .lib-item span{
-    position:absolute; left:0; right:0; bottom:0; font-size:9px; padding:3px 4px;
-    background:linear-gradient(0deg, rgba(0,0,0,0.75), transparent); color:#fff; line-height:1.2;
-  }
-  .lib-item .playicon{ position:absolute; top:4px; right:4px; width:12px; height:12px; opacity:0.9; }
-
-  .seg.wrap{ grid-auto-flow:row; grid-template-columns:1fr 1fr; }
-  .seg.wrap button{ font-size:11px; padding:10px 4px; line-height:1.3; }
-
-  .chip-row{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
-  .chip{
-    background:var(--ink-2); border:1px solid var(--line); color:var(--text-muted);
-    font-family:inherit; font-size:11px; font-weight:600; padding:6px 11px;
-    border-radius:20px; cursor:pointer; transition:all .15s ease;
-  }
-  .chip.active{ background:var(--gold); border-color:var(--gold); color:var(--ink); }
-  .chip:hover:not(.active){ border-color:var(--gold); color:var(--gold-light); }
-
-  .reciter-list{ max-height:230px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding-right:2px; }
-  .reciter-item{
-    display:flex; align-items:center; justify-content:space-between; gap:8px;
-    background:var(--ink-2); border:1px solid var(--line); border-radius:9px;
-    padding:9px 12px; cursor:pointer; transition:all .15s ease;
-  }
-  .reciter-item:hover{ border-color:var(--gold); }
-  .reciter-item.active{ border-color:var(--gold); box-shadow:0 0 0 1px var(--gold) inset; background:rgba(201,162,75,0.08); }
-  .reciter-item .rname{ font-size:12.5px; font-weight:600; color:var(--text-light); }
-  .reciter-item .rtags{ font-size:10px; color:var(--text-muted); margin-top:2px; }
-  .reciter-item .rcheck{ width:16px; height:16px; border-radius:50%; border:1.5px solid var(--line); flex-shrink:0; }
-  .reciter-item.active .rcheck{ background:var(--gold); border-color:var(--gold); }
-
-  .theme-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-  .theme-card{
-    border:1.5px solid var(--line); border-radius:10px; padding:10px; cursor:pointer;
-    transition:all .15s ease; text-align:center;
-  }
-  .theme-card:hover{ border-color:var(--gold); }
-  .theme-card .swatch{ height:28px; border-radius:6px; margin-bottom:7px; }
-  .theme-card span{ font-size:10.5px; color:var(--text-muted); font-weight:600; }
-
-  .search-results{ max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:5px; margin-bottom:10px; }
-  .search-result-item{
-    background:var(--ink-2); border:1px solid var(--line); border-radius:8px; padding:8px 10px;
-    cursor:pointer; font-size:11.5px; color:var(--text-muted); transition:all .15s ease;
-  }
-  .search-result-item:hover{ border-color:var(--gold); color:var(--gold-light); }
-  .search-result-item b{ color:var(--gold-light); font-weight:700; }
-
-  .preset-list{ display:flex; flex-direction:column; gap:6px; margin-top:10px; }
-  .preset-item{
-    display:flex; align-items:center; justify-content:space-between; gap:8px;
-    background:var(--ink-2); border:1px solid var(--line); border-radius:8px; padding:8px 10px;
-    font-size:12px; cursor:pointer;
-  }
-  .preset-item:hover{ border-color:var(--gold); }
-  .preset-item .del{ color:var(--text-muted); font-size:11px; padding:2px 6px; }
-  .preset-item .del:hover{ color:var(--rec); }
 
   .rec-indicator{
     position:absolute; top:14px; left:14px; display:none;
@@ -307,27 +229,7 @@
   <div class="rail">
 
     <div class="group">
-      <div class="group-title"><span class="dash"></span>Thèmes rapides</div>
-      <div class="theme-grid" id="themeGrid"></div>
-    </div>
-
-    <div class="group">
-      <div class="group-title"><span class="dash"></span>Type de contenu</div>
-      <div class="seg" id="contentTypeSeg">
-        <button data-type="quran" class="active">Coran</button>
-        <button data-type="hadith">Hadith</button>
-        <button data-type="adhkar">Adhkar</button>
-      </div>
-    </div>
-
-    <div class="group" id="quranSourceGroup">
       <div class="group-title"><span class="dash"></span>Source du verset</div>
-      <label class="field">
-        <span class="lbl">Rechercher un mot ou une expression</span>
-        <input type="text" id="verseSearchInput" placeholder="ex: miséricorde, patience…">
-      </label>
-      <div class="hint" id="verseSearchHint"></div>
-      <div class="search-results" id="verseSearchResults"></div>
       <label class="field">
         <span class="lbl">Sourate</span>
         <select id="surahSelect"><option>Chargement…</option></select>
@@ -343,182 +245,23 @@
         </label>
       </div>
       <div class="hint" id="rangeHint">—</div>
-      <label class="checkline"><input type="checkbox" id="basmalaChk"> Afficher la Basmala avant le premier verset</label>
     </div>
 
-    <div class="group" id="hadithSourceGroup" style="display:none;">
-      <div class="group-title"><span class="dash"></span>Source du hadith</div>
-      <label class="field">
-        <span class="lbl">Recueil</span>
-        <select id="hadithBookSelect"><option>Chargement…</option></select>
-      </label>
-      <label class="field">
-        <span class="lbl">Traduction</span>
-        <select id="hadithLangSelect"><option>Chargement…</option></select>
-      </label>
-      <div class="row2">
-        <label class="field">
-          <span class="lbl">Du n°</span>
-          <input type="number" id="hadithFrom" min="1" value="1">
-        </label>
-        <label class="field">
-          <span class="lbl">Au n°</span>
-          <input type="number" id="hadithTo" min="1" value="1">
-        </label>
-      </div>
-      <button class="secondary" id="hadithRandomBtn" style="width:100%; margin-top:4px;">🎲 Hadith aléatoire</button>
-      <div class="hint" id="hadithHint" style="margin-top:8px;"></div>
-    </div>
-
-    <div class="group" id="adhkarSourceGroup" style="display:none;">
-      <div class="group-title"><span class="dash"></span>Source des adhkar</div>
-      <label class="field">
-        <span class="lbl">Catégorie</span>
-        <select id="adhkarCategorySelect">
-          <option value="azkar_sabah">Adhkar du matin</option>
-          <option value="azkar_massa">Adhkar du soir</option>
-          <option value="PostPrayer_azkar">Adhkar après la prière</option>
-        </select>
-      </label>
-      <div class="row2">
-        <label class="field">
-          <span class="lbl">Du n°</span>
-          <input type="number" id="adhkarFrom" min="1" value="1">
-        </label>
-        <label class="field">
-          <span class="lbl">Au n°</span>
-          <input type="number" id="adhkarTo" min="1" value="3">
-        </label>
-      </div>
-      <div class="hint" id="adhkarHint" style="margin-top:8px;"></div>
-    </div>
-
-    <div class="group" id="reciterGroup">
+    <div class="group">
       <div class="group-title"><span class="dash"></span>Récitateur</div>
-      <input type="text" id="reciterSearch" placeholder="Rechercher un récitateur…" style="margin-bottom:9px;">
-      <div class="chip-row" id="reciterChips"></div>
-      <div class="reciter-list" id="reciterList">
-        <div class="hint">Vérification des voix disponibles…</div>
-      </div>
-      <label class="field" style="margin-top:12px;">
-        <span class="lbl">Vitesse de récitation</span>
-        <div class="range-row">
-          <input type="range" id="speedInput" min="0.75" max="1.25" step="0.05" value="1">
-          <span id="speedValue">1.00x</span>
-        </div>
+      <label class="field">
+        <span class="lbl">Voix</span>
+        <select id="reciterSelect"><option>Chargement…</option></select>
       </label>
     </div>
 
     <div class="group">
-      <div class="group-title"><span class="dash"></span>Musique de fond (Nasheed)</div>
-      <label class="filebtn" id="nasheedFileBtn">Cliquer pour importer un nasheed (MP3)
-        <input type="file" id="nasheedFile" accept="audio/*">
-      </label>
-      <label class="field" style="margin-top:10px; display:none;" id="nasheedVolumeField">
-        <span class="lbl">Volume du fond sonore</span>
-        <div class="range-row">
-          <input type="range" id="nasheedVolumeInput" min="0" max="1" step="0.05" value="0.35">
-          <span id="nasheedVolumeValue">35%</span>
-        </div>
-      </label>
-      <div class="hint">Importez un nasheed que vous avez le droit d'utiliser. Besoin d'en trouver un libre de droits ? <a href="https://pixabay.com/music/search/nasheed/" target="_blank" rel="noopener" style="color:var(--gold-light);">Parcourir sur Pixabay ↗</a></div>
-    </div>
-
-    <div class="group" id="translationGroup">
       <div class="group-title"><span class="dash"></span>Traduction</div>
       <label class="field">
         <span class="lbl">Langue / édition</span>
         <select id="translationSelect"><option>Chargement…</option></select>
       </label>
       <label class="checkline"><input type="checkbox" id="showTranslation" checked> Afficher la traduction à l'écran</label>
-      <label class="checkline"><input type="checkbox" id="showSecondTranslation"> Afficher une deuxième traduction</label>
-      <label class="field" id="secondTranslationField" style="display:none; margin-top:8px;">
-        <span class="lbl">Deuxième langue / édition</span>
-        <select id="translationSelect2"><option>Chargement…</option></select>
-      </label>
-    </div>
-
-    <div class="group">
-      <div class="group-title"><span class="dash"></span>Texte</div>
-
-      <label class="field">
-        <span class="lbl">Police du verset (arabe)</span>
-        <select id="arabicFontSelect">
-          <option value="Amiri">Amiri — classique</option>
-          <option value="Scheherazade New">Scheherazade — traditionnelle</option>
-          <option value="Noto Naskh Arabic">Noto Naskh — très lisible</option>
-          <option value="Reem Kufi">Reem Kufi — moderne</option>
-        </select>
-      </label>
-
-      <label class="field">
-        <span class="lbl">Police de la traduction</span>
-        <select id="translationFontSelect">
-          <option value="Manrope">Manrope — par défaut</option>
-          <option value="Lora">Lora — serif élégant</option>
-          <option value="Poppins">Poppins — rond, moderne</option>
-          <option value="Inter">Inter — neutre</option>
-        </select>
-      </label>
-
-      <label class="field">
-        <span class="lbl">Couleurs du texte</span>
-        <div class="color-row">
-          <input type="color" id="arabicColorInput" value="#f5f1e6" title="Couleur du verset arabe">
-          <input type="color" id="translationColorInput" value="#cfe3dc" title="Couleur de la traduction">
-          <input type="color" id="accentColorInput" value="#c9a24b" title="Couleur d'accent (badge, ornements)">
-        </div>
-      </label>
-
-      <label class="field">
-        <span class="lbl">Taille du texte arabe</span>
-        <div class="range-row">
-          <input type="range" id="arabicScaleInput" min="0.6" max="1.6" step="0.05" value="1">
-          <span id="arabicScaleValue">100%</span>
-        </div>
-      </label>
-
-      <label class="field">
-        <span class="lbl">Taille de la traduction</span>
-        <div class="range-row">
-          <input type="range" id="translationScaleInput" min="0.6" max="1.6" step="0.05" value="1">
-          <span id="translationScaleValue">100%</span>
-        </div>
-      </label>
-
-      <label class="field">
-        <span class="lbl">Espacement verset / traduction</span>
-        <div class="range-row">
-          <input type="range" id="verseGapInput" min="0" max="3" step="0.1" value="1">
-          <span id="verseGapValue">100%</span>
-        </div>
-      </label>
-
-      <label class="field">
-        <span class="lbl">Filigrane (discret, coin bas-gauche)</span>
-        <input type="text" id="watermarkInput" value="Younus Islam" placeholder="Nom de votre compte…" maxlength="40">
-      </label>
-
-      <label class="field">
-        <span class="lbl">Position du texte</span>
-        <div class="seg" id="textPosSeg">
-          <button data-pos="top">Haut</button>
-          <button data-pos="center" class="active">Centre</button>
-          <button data-pos="bottom">Bas</button>
-        </div>
-      </label>
-
-      <label class="checkline"><input type="checkbox" id="tajweedChk"> Coloration Tajweed (règles de récitation)</label>
-      <label class="checkline"><input type="checkbox" id="karaokeChk"> Surlignage progressif du verset (karaoké)</label>
-    </div>
-
-    <div class="group">
-      <div class="group-title"><span class="dash"></span>Mes styles</div>
-      <div class="row2">
-        <button class="secondary" id="savePresetBtn" style="width:100%;">💾 Enregistrer ce style</button>
-        <button class="secondary" id="resetPresetBtn" style="width:100%;">↺ Réinitialiser</button>
-      </div>
-      <div class="preset-list" id="presetList"></div>
     </div>
 
     <div class="group">
@@ -551,19 +294,13 @@
       <label class="filebtn" id="vidFileBtn" style="display:none;">Cliquer pour importer une vidéo (MP4/WebM)
         <input type="file" id="vidFile" accept="video/*">
       </label>
-
-      <div class="lib-title">Bibliothèque — vidéos &amp; images prêtes à l'emploi</div>
-      <div class="lib-grid" id="libGrid"></div>
-      <div class="hint" id="libHint" style="margin-top:8px;"></div>
     </div>
 
     <div class="group">
       <div class="group-title"><span class="dash"></span>Format de sortie</div>
-      <div class="seg wrap" id="formatSeg">
-        <button data-format="9:16" class="active">9:16<br>TikTok / Reels / Shorts</button>
-        <button data-format="16:9">16:9<br>YouTube</button>
-        <button data-format="1:1">1:1<br>Post carré IG/FB</button>
-        <button data-format="4:5">4:5<br>Post portrait IG</button>
+      <div class="seg" id="formatSeg">
+        <button data-format="9:16" class="active">9:16 · Reels/TikTok</button>
+        <button data-format="1:1">1:1 · Carré</button>
       </div>
     </div>
 
@@ -578,12 +315,9 @@
 
     <div class="verse-loading" id="verseLoading">Chargement des versets…</div>
 
-    <div class="hint" id="sizeEstimate"></div>
-
     <div class="progress-wrap" id="progressWrap" style="display:none;">
       <div class="progress-label"><span id="progressText">—</span><span id="progressPct">0%</span></div>
       <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-      <button class="secondary" id="cancelBtn" style="margin-top:10px; width:100%; display:none;">✕ Annuler</button>
     </div>
 
     <div class="actions">
@@ -593,274 +327,23 @@
         Générer &amp; exporter la vidéo
       </button>
     </div>
-    <div class="actions">
-      <button class="secondary" id="batchExportBtn">⬇ Exporter tous les formats</button>
-    </div>
 
     <div class="result" id="result">
       <video id="resultVideo" controls></video>
-      <div class="dl-row">
-        <a id="downloadLink" download="quran-studio.webm">⬇ Télécharger la vidéo (.webm)</a>
-        <button class="secondary" id="shareBtn" style="display:none;">📤 Partager</button>
-      </div>
-      <div class="dl-row">
-        <button class="secondary" id="hashtagsBtn" style="width:100%;">#️⃣ Télécharger les hashtags (.txt)</button>
-      </div>
-      <div class="hint">Compatible montage / partage direct. Pour Instagram ou TikTok sur mobile, si le format .webm n'est pas accepté, convertissez-le rapidement en .mp4 avec un outil gratuit (CloudConvert, VLC…). Un fichier de hashtags a été téléchargé automatiquement avec votre vidéo.</div>
-    </div>
-
-    <div class="result" id="batchResult">
-      <div class="hint" style="margin-bottom:4px;">Exports par lot :</div>
-      <div class="dl-row" id="batchLinks" style="flex-direction:column;"></div>
+      <div class="dl-row"><a id="downloadLink" download="quran-studio.webm">⬇ Télécharger la vidéo (.webm)</a></div>
+      <div class="hint">Compatible montage / partage direct. Pour Instagram ou TikTok sur mobile, si le format .webm n'est pas accepté, convertissez-le rapidement en .mp4 avec un outil gratuit (CloudConvert, VLC…).</div>
     </div>
   </div>
 </main>
 
-<audio id="audioPlayer" style="display:none;"></audio>
-<audio id="nasheedPlayer" loop style="display:none;"></audio>
+<audio id="audioPlayer" crossorigin="anonymous" style="display:none;"></audio>
 
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 <script>
 (function(){
   "use strict";
 
   const API = "https://api.alquran.cloud/v1";
   const AUDIO_CDN = "https://cdn.islamic.network/quran/audio/128";
-
-  // Fonds pré-enregistrés (libres de droits, CDN compatibles CORS)
-  const PRESET_BACKGROUNDS = [
-    { type:'image', label:'Dunes au coucher du soleil',
-      url:'https://images.unsplash.com/photo-1760721459088-1a70d26b8ad1?auto=format&fit=crop&w=1600&q=75',
-      thumb:'https://images.unsplash.com/photo-1760721459088-1a70d26b8ad1?auto=format&fit=crop&w=160&q=50' },
-    { type:'image', label:'Mer calme',
-      url:'https://images.unsplash.com/photo-1491920239164-36aa5a5bd06f?auto=format&fit=crop&w=1600&q=75',
-      thumb:'https://images.unsplash.com/photo-1491920239164-36aa5a5bd06f?auto=format&fit=crop&w=160&q=50' },
-    { type:'image', label:'Ciel étoilé',
-      url:'https://images.unsplash.com/photo-1753561881904-37dee26b7a2d?auto=format&fit=crop&w=1600&q=75',
-      thumb:'https://images.unsplash.com/photo-1753561881904-37dee26b7a2d?auto=format&fit=crop&w=160&q=50' },
-    { type:'image', label:'Forêt lumineuse',
-      url:'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1600&q=75',
-      thumb:'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=160&q=50' },
-    { type:'video', label:'Coucher de soleil sur la mer',
-      url:'https://assets.mixkit.co/videos/4119/4119-720.mp4',
-      thumb:'https://assets.mixkit.co/videos/4119/4119-thumb-360-0.jpg' },
-    { type:'video', label:'Ciel étoilé, lac calme',
-      url:'https://assets.mixkit.co/videos/1704/1704-720.mp4',
-      thumb:'https://assets.mixkit.co/videos/1704/1704-thumb-360-0.jpg' },
-    { type:'video', label:'Dunes du Sahara',
-      url:'https://assets.mixkit.co/videos/4149/4149-720.mp4',
-      thumb:'https://assets.mixkit.co/videos/4149/4149-thumb-360-0.jpg' },
-    { type:'video', label:'Désert, nuages en accéléré',
-      url:'https://assets.mixkit.co/videos/4048/4048-720.mp4',
-      thumb:'https://assets.mixkit.co/videos/4048/4048-thumb-360-0.jpg' },
-    { type:'video', label:'Chat joue avec une balle',
-      url:'https://assets.mixkit.co/videos/6915/6915-720.mp4',
-      thumb:'https://assets.mixkit.co/videos/6915/6915-thumb-720-0.jpg' },
-    { type:'video', label:'Chat câliné par son propriétaire',
-      url:'https://assets.mixkit.co/videos/1779/1779-720.mp4',
-      thumb:'https://assets.mixkit.co/videos/1779/1779-thumb-720-0.jpg' },
-    { type:'video', label:'Galaxie et étoiles',
-      url:'https://assets.mixkit.co/videos/1610/1610-720.mp4',
-      thumb:'https://assets.mixkit.co/videos/1610/1610-thumb-720-0.jpg' },
-    { type:'video', label:'Ciel nocturne étoilé',
-      url:'https://assets.mixkit.co/videos/39768/39768-720.mp4',
-      thumb:'https://assets.mixkit.co/videos/39768/39768-thumb-720-0.jpg' },
-    { type:'video', label:'Voie lactée sur les montagnes',
-      url:'https://assets.mixkit.co/videos/9616/9616-360.mp4',
-      thumb:'https://assets.mixkit.co/videos/9616/9616-thumb-360-0.jpg' },
-    { type:'video', label:'Homme seul face à la mer',
-      url:'https://assets.mixkit.co/videos/35421/35421-360.mp4',
-      thumb:'https://assets.mixkit.co/videos/35421/35421-thumb-360-0.jpg' },
-    { type:'video', label:'Rue déserte dans la ville',
-      url:'https://assets.mixkit.co/videos/25000/25000-360.mp4',
-      thumb:'https://assets.mixkit.co/videos/25000/25000-thumb-360-0.jpg' },
-  ];
-
-  // Récitateurs candidats — vérifiés automatiquement au chargement de la
-  // page (certains identifiants ne sont pas réellement servis par le CDN
-  // à ce niveau de qualité ; on ne garde que ceux qui répondent vraiment).
-  const RECITER_CANDIDATES = [
-    { id:'ar.alafasy', name:'Mishary Rashid Alafasy', tags:['populaire','voix-douce','rythme-moyen'] },
-    { id:'ar.abdulbasitmurattal', name:'Abdul Basit (Murattal)', tags:['classique','voix-puissante','rythme-lent'] },
-    { id:'ar.abdulsamad', name:'Abdul Basit (Mujawwad)', tags:['classique','voix-puissante','rythme-lent'] },
-    { id:'ar.abdurrahmaansudais', name:'Abdur-Rahman As-Sudais', tags:['populaire','voix-puissante','rythme-moyen'] },
-    { id:'ar.saoodshuraym', name:'Saud Al-Shuraim', tags:['populaire','voix-puissante','rythme-moyen'] },
-    { id:'ar.husary', name:'Mahmoud Khalil Al-Husary', tags:['classique','rythme-lent'] },
-    { id:'ar.husarymujawwad', name:'Al-Husary (Mujawwad)', tags:['classique','rythme-lent'] },
-    { id:'ar.minshawi', name:'Mohamed Al-Minshawi (Murattal)', tags:['voix-douce','rythme-moyen'] },
-    { id:'ar.minshawimujawwad', name:'Al-Minshawi (Mujawwad)', tags:['voix-douce','rythme-lent'] },
-    { id:'ar.hudhaify', name:'Ali Al-Hudhaify', tags:['rythme-rapide'] },
-    { id:'ar.mahermuaiqly', name:'Maher Al Muaiqly', tags:['populaire','voix-douce','rythme-moyen'] },
-    { id:'ar.shaatree', name:'Abu Bakr Al-Shatri', tags:['voix-douce','rythme-moyen'] },
-    { id:'ar.ahmedajamy', name:'Ahmed Al-Ajamy', tags:['rythme-rapide'] },
-    { id:'ar.hanirifai', name:'Hani Rifai', tags:['voix-douce','rythme-lent'] },
-    { id:'ar.muhammadayyoub', name:'Muhammad Ayyoub', tags:['rythme-moyen'] },
-    { id:'ar.muhammadjibreel', name:'Muhammad Jibreel', tags:['rythme-moyen'] },
-    { id:'ar.parhizgar', name:'Shahriar Parhizgar', tags:['voix-douce','rythme-lent'] },
-    { id:'ar.yasseraldossari', name:'Yasser Al-Dossari', tags:['populaire','voix-douce','rythme-lent'] },
-    { id:'ar.muhammadalluhaidan', name:'Muhammad Al-Luhaidan', tags:['populaire','voix-douce','rythme-lent'] },
-    { id:'ar.idrisabkar', name:'Idris Abkar', tags:['voix-douce','rythme-lent'] },
-    { id:'ar.nasseralqatami', name:'Nasser Al-Qatami', tags:['populaire','voix-douce','rythme-moyen'] },
-    { id:'ar.faresabbad', name:'Fares Abbad', tags:['voix-douce','rythme-lent'] },
-    { id:'ar.bandarbaleela', name:'Bandar Baleela', tags:['voix-puissante','rythme-moyen'] },
-    { id:'ar.abdullahbasfar', name:'Abdullah Basfar', tags:['classique','rythme-moyen'] },
-    { id:'ar.salahbukhatir', name:'Salah Bukhatir', tags:['voix-douce','rythme-moyen'] },
-    { id:'ar.alihajjajalsuwaidan', name:'Ali Al-Hajjaj', tags:['voix-douce','rythme-moyen'] },
-    { id:'ar.wadeeyamani', name:'Wadee Al-Yamani', tags:['voix-douce','rythme-lent'] },
-  ];
-
-  const RECITER_TAGS = [
-    { key:'all', label:'Tous' },
-    { key:'populaire', label:'Populaire' },
-    { key:'voix-douce', label:'Voix douce' },
-    { key:'voix-puissante', label:'Voix puissante' },
-    { key:'rythme-lent', label:'Lent' },
-    { key:'rythme-rapide', label:'Rapide' },
-    { key:'classique', label:'Classique' },
-  ];
-
-  // Recueils de hadiths proposés (identifiants "book" de l'API fawazahmed0)
-  // avec un nombre max approximatif utilisé pour le tirage aléatoire.
-  const HADITH_BOOKS = [
-    { key:'bukhari', label:'Sahih al-Bukhari', max:7563 },
-    { key:'muslim', label:'Sahih Muslim', max:7500 },
-    { key:'abudawud', label:'Sunan Abu Dawud', max:5274 },
-    { key:'tirmidhi', label:'Jami at-Tirmidhi', max:3956 },
-    { key:'nasai', label:'Sunan an-Nasai', max:5758 },
-    { key:'ibnmajah', label:'Sunan Ibn Majah', max:4341 },
-    { key:'malik', label:'Muwatta Malik', max:1832 },
-    { key:'riyadussalihin', label:'Riyad as-Salihin', max:1896 },
-    { key:'nawawi40', label:"Les 40 hadiths de An-Nawawi", max:42 },
-    { key:'qudsi40', label:'40 Hadith Qudsi', max:40 },
-  ];
-
-  const ADHKAR_CATEGORIES = {
-    azkar_sabah: { label:'Adhkar du matin', url:'https://ahegazy.github.io/muslimKit/json/azkar_sabah.json' },
-    azkar_massa: { label:'Adhkar du soir', url:'https://ahegazy.github.io/muslimKit/json/azkar_massa.json' },
-    PostPrayer_azkar: { label:'Adhkar après la prière', url:'https://ahegazy.github.io/muslimKit/json/PostPrayer_azkar.json' },
-  };
-  const adhkarCache = new Map();
-
-  // ---------------------------------------------------------------
-  // VIRAL HASHTAGS — combined per export into a downloadable .txt
-  // ---------------------------------------------------------------
-  const HASHTAGS_GENERAL = [
-    '#Quran', '#Coran', '#Islam', '#IslamicReminder', '#Muslim', '#Dawah',
-    '#Deen', '#Ummah', '#Faith', '#Spirituality', '#IslamicQuotes',
-    '#QuranicVerses', '#Reminder', '#IslamicVideo', '#MuslimTikTok',
-  ];
-  const HASHTAGS_PLATFORM = [
-    '#shorts', '#reels', '#fyp', '#foryoupage', '#viral', '#explore',
-    '#trending', '#reelsinstagram', '#tiktokislam', '#youtubeshorts',
-  ];
-  const HASHTAGS_QURAN = [
-    '#QuranRecitation', '#Tilawah', '#QuranDaily', '#Ayah', '#HifzQuran',
-    '#QuranTime', '#BeautifulQuran', '#QuranVerses',
-  ];
-  const HASHTAGS_HADITH = [
-    '#Hadith', '#Sunnah', '#ProphetMuhammad', '#HadithOfTheDay',
-    '#SahihBukhari', '#IslamicKnowledge',
-  ];
-  const HASHTAGS_ADHKAR = [
-    '#Adhkar', '#Dhikr', '#Dua', '#DuaOfTheDay', '#Remembrance', '#Prayer',
-  ];
-
-  function slugifyTag(text){
-    return '#' + text
-      .normalize('NFKD').replace(/[\u0300-\u036f]/g, '') // strip accents
-      .replace(/[^a-zA-Z0-9]+/g, '')
-      .replace(/^./, c => c.toUpperCase());
-  }
-
-  function pickRandom(arr, n){
-    const copy = [...arr];
-    const out = [];
-    while(copy.length && out.length < n){
-      out.push(copy.splice(Math.floor(Math.random()*copy.length), 1)[0]);
-    }
-    return out;
-  }
-
-  function generateHashtags(){
-    const tags = new Set();
-    HASHTAGS_GENERAL.forEach(t => tags.add(t));
-    pickRandom(HASHTAGS_PLATFORM, 5).forEach(t => tags.add(t));
-
-    if(state.contentType === 'quran'){
-      HASHTAGS_QURAN.forEach(t => tags.add(t));
-      const s = state.surahs.find(x=>x.number == state.selectedSurah);
-      if(s) tags.add(slugifyTag('Surah' + s.englishName));
-      const reciter = (state.reciters || []).find(r=>r.id===state.reciter);
-      if(reciter) tags.add(slugifyTag(reciter.name));
-    } else if(state.contentType === 'hadith'){
-      HASHTAGS_HADITH.forEach(t => tags.add(t));
-      const book = HADITH_BOOKS.find(b=>b.key===state.hadithBook);
-      if(book) tags.add(slugifyTag(book.label));
-    } else if(state.contentType === 'adhkar'){
-      HASHTAGS_ADHKAR.forEach(t => tags.add(t));
-      const cat = ADHKAR_CATEGORIES[state.adhkarCategory];
-      if(cat) tags.add(slugifyTag(cat.label));
-    }
-    return [...tags];
-  }
-
-  function downloadHashtagsFile(filenameBase){
-    const tags = generateHashtags();
-    const content = tags.join(' ') + '\n\n— une par ligne —\n\n' + tags.join('\n');
-    const blob = new Blob([content], {type:'text/plain;charset=utf-8'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${filenameBase}-hashtags.txt`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(()=> URL.revokeObjectURL(url), 4000);
-  }
-
-
-  // Thèmes prêts à l'emploi : combinaisons police + couleurs + fond
-  const THEMES = [
-    { name:'Classique doré', swatch:'linear-gradient(135deg,#0c2622,#c9a24b)',
-      arabicFont:'Amiri', translationFont:'Manrope', arabicColor:'#f5f1e6', translationColor:'#cfe3dc',
-      accentColor:'#c9a24b', bgMode:'gradient' },
-    { name:'Minimaliste sombre', swatch:'linear-gradient(135deg,#08120f,#3a3f3d)',
-      arabicFont:'Noto Naskh Arabic', translationFont:'Inter', arabicColor:'#ffffff', translationColor:'#a8a8a8',
-      accentColor:'#ffffff', bgMode:'geo' },
-    { name:'Nature apaisante', swatch:'linear-gradient(135deg,#12382f,#7fae94)',
-      arabicFont:'Scheherazade New', translationFont:'Lora', arabicColor:'#f3ead3', translationColor:'#cfe3dc',
-      accentColor:'#e6cb84', bgMode:'particles' },
-    { name:'Manuscrit ancien', swatch:'linear-gradient(135deg,#2b1d10,#c9a24b)',
-      arabicFont:'Scheherazade New', translationFont:'Lora', arabicColor:'#f3ead3', translationColor:'#e0cfa8',
-      accentColor:'#c9a24b', bgMode:'geo' },
-    { name:'Moderne épuré', swatch:'linear-gradient(135deg,#123a33,#e6cb84)',
-      arabicFont:'Reem Kufi', translationFont:'Poppins', arabicColor:'#f5f1e6', translationColor:'#cfe3dc',
-      accentColor:'#e6cb84', bgMode:'gradient' },
-    { name:'Nuit étoilée', swatch:'linear-gradient(135deg,#05060f,#2b3a67)',
-      arabicFont:'Amiri', translationFont:'Inter', arabicColor:'#ffffff', translationColor:'#b8c4e0',
-      accentColor:'#7c93d1', bgMode:'particles' },
-  ];
-
-  // Palette Tajweed approximative (règles courantes → couleur)
-  const TAJWEED_COLORS = {
-    ham_wasl:        '#aaaaaa',
-    silent:          '#aaaaaa',
-    laam_shamsiyah:  '#aaaaaa',
-    madda_normal:        '#ff7e1e',
-    madda_permissible:   '#ff7e1e',
-    madda_necessary:     '#ff7e1e',
-    madda_obligatory:    '#ff7e1e',
-    ghunnah:             '#ff7e1e',
-    qalqalah:            '#dd0008',
-    ikhafa:              '#9400a8',
-    ikhafa_shafawi:      '#9400a8',
-    idgham_ghunnah:      '#169777',
-    idgham_wo_ghunnah:   '#169777',
-    idgham_shafawi:      '#169777',
-    idgham_mutajanisayn: '#169777',
-    idgham_mutaqaribayn: '#169777',
-    iqlab:               '#26bffd',
-  };
 
   // ---------------------------------------------------------------
   // STATE
@@ -872,74 +355,32 @@
     fromAyah: 1,
     toAyah: 7,
     reciter: null,
-    reciters: [],
     translation: null,
-    translation2: null,
     showTranslation: true,
-    showSecondTranslation: false,
-    arabicFont: 'Amiri',
-    translationFont: 'Manrope',
-    arabicColor: '#f5f1e6',
-    translationColor: '#cfe3dc',
-    accentColor: '#c9a24b',
-    watermarkText: 'Younus Islam',
-    arabicTextScale: 1,
-    translationTextScale: 1,
-    verseGap: 1,
-    textPosition: 'center',   // 'top' | 'center' | 'bottom'
-    tajweed: false,
-    karaoke: false,
-    basmala: false,
-    speed: 1,
-    contentType: 'quran',   // 'quran' | 'hadith' | 'adhkar'
-    hadithBooks: [],
-    hadithBook: null,
-    hadithLang: null,
-    hadithFrom: 1,
-    hadithTo: 1,
-    adhkarCategory: 'azkar_sabah',
-    adhkarFrom: 1,
-    adhkarTo: 3,
-    nasheedUrl: null,
-    nasheedVolume: 0.35,
     bgMode: 'gradient',
     imageEl: null,
     videoEl: null,
     format: '9:16',
-    verses: [],          // [{numberInSurah, globalNumber, arabic, translation, translation2, tajweedSegments}]
+    verses: [],          // [{numberInSurah, globalNumber, arabic, translation}]
     currentVerseIndex: 0,
-    verseChangedAt: 0,    // timestamp for text crossfade
     isRunning: false,     // rAF loop active
     isRecording: false,
-    cancelRequested: false,
     particles: [],
-    activePresetUrl: null,
-    showingBasmalaFrame: false,
   };
-
-  // In-memory cache to avoid refetching verses already loaded this session
-  const verseCache = new Map();
 
   const el = id => document.getElementById(id);
   const surahSelect = el('surahSelect');
   const fromAyahInput = el('fromAyah');
   const toAyahInput = el('toAyah');
   const rangeHint = el('rangeHint');
-  const reciterSearch = el('reciterSearch');
-  const reciterChips = el('reciterChips');
-  const reciterList = el('reciterList');
+  const reciterSelect = el('reciterSelect');
   const translationSelect = el('translationSelect');
-  const translationSelect2 = el('translationSelect2');
   const showTranslationChk = el('showTranslation');
-  const showSecondTranslationChk = el('showSecondTranslation');
-  const secondTranslationField = el('secondTranslationField');
   const canvas = el('stageCanvas');
   const ctx = canvas.getContext('2d');
   const verseLoading = el('verseLoading');
   const generateBtn = el('generateBtn');
   const previewBtn = el('previewBtn');
-  const batchExportBtn = el('batchExportBtn');
-  const cancelBtn = el('cancelBtn');
   const progressWrap = el('progressWrap');
   const progressText = el('progressText');
   const progressPct = el('progressPct');
@@ -948,50 +389,7 @@
   const resultBox = el('result');
   const resultVideo = el('resultVideo');
   const downloadLink = el('downloadLink');
-  const shareBtn = el('shareBtn');
-  const hashtagsBtn = el('hashtagsBtn');
-  const batchResultBox = el('batchResult');
-  const batchLinks = el('batchLinks');
-  const sizeEstimate = el('sizeEstimate');
-  const themeGrid = el('themeGrid');
-  const verseSearchInput = el('verseSearchInput');
-  const verseSearchHint = el('verseSearchHint');
-  const verseSearchResults = el('verseSearchResults');
-  const basmalaChk = el('basmalaChk');
-  const speedInput = el('speedInput');
-  const speedValue = el('speedValue');
-  const tajweedChk = el('tajweedChk');
-  const karaokeChk = el('karaokeChk');
-  const textPosSeg = el('textPosSeg');
-  const savePresetBtn = el('savePresetBtn');
-  const resetPresetBtn = el('resetPresetBtn');
-  const presetList = el('presetList');
-  const contentTypeSeg = el('contentTypeSeg');
-  const quranSourceGroup = el('quranSourceGroup');
-  const hadithSourceGroup = el('hadithSourceGroup');
-  const adhkarSourceGroup = el('adhkarSourceGroup');
-  const reciterGroup = el('reciterGroup');
-  const translationGroup = el('translationGroup');
-  const hadithBookSelect = el('hadithBookSelect');
-  const hadithLangSelect = el('hadithLangSelect');
-  const hadithFromInput = el('hadithFrom');
-  const hadithToInput = el('hadithTo');
-  const hadithRandomBtn = el('hadithRandomBtn');
-  const hadithHint = el('hadithHint');
-  const adhkarCategorySelect = el('adhkarCategorySelect');
-  const adhkarFromInput = el('adhkarFrom');
-  const adhkarToInput = el('adhkarTo');
-  const adhkarHint = el('adhkarHint');
-  const nasheedFileBtn = el('nasheedFileBtn');
-  const nasheedFileInput = el('nasheedFile');
-  const nasheedVolumeField = el('nasheedVolumeField');
-  const nasheedVolumeInput = el('nasheedVolumeInput');
-  const nasheedVolumeValue = el('nasheedVolumeValue');
-  const nasheedPlayer = el('nasheedPlayer');
   const audioPlayer = el('audioPlayer');
-  audioPlayer.muted = false;
-  audioPlayer.volume = 1.0;
-  audioPlayer.preload = 'auto';
 
   // ---------------------------------------------------------------
   // FETCH HELPERS
@@ -1019,94 +417,27 @@
     }
   }
 
-  // ---------------------------------------------------------------
-  // RECITERS — verify each candidate actually has a working audio
-  // file on the CDN before offering it, so no dead voice is listed.
-  // ---------------------------------------------------------------
-  let reciterActiveTag = 'all';
-  let reciterSearchTerm = '';
-
-  function verifyReciter(candidate){
-    return new Promise((resolve)=>{
-      const testUrl = `${AUDIO_CDN}/${candidate.id}/1.mp3`;
-      const probe = new Audio();
-      probe.preload = 'metadata';
-      let done = false;
-      const finish = (ok)=>{
-        if(done) return; done = true;
-        probe.removeEventListener('loadedmetadata', onOk);
-        probe.removeEventListener('error', onFail);
-        resolve(ok);
-      };
-      const onOk = ()=> finish(true);
-      const onFail = ()=> finish(false);
-      probe.addEventListener('loadedmetadata', onOk, {once:true});
-      probe.addEventListener('error', onFail, {once:true});
-      probe.src = testUrl;
-      setTimeout(()=> finish(false), 6000);
-    });
-  }
-
   async function loadReciters(){
-    const results = await Promise.all(RECITER_CANDIDATES.map(async (c)=>{
-      const ok = await verifyReciter(c);
-      return {...c, available: ok};
-    }));
-    let working = results.filter(r => r.available);
-    // safety net: if the verification pass itself failed for some reason
-    // (e.g. blocked network), fall back to the full list rather than empty
-    if(working.length === 0) working = results;
-    state.reciters = working;
-    state.reciter = working[0].id;
-    renderReciterChips();
-    renderReciterList();
-  }
-
-  function renderReciterChips(){
-    reciterChips.innerHTML = RECITER_TAGS.map(t =>
-      `<button class="chip${t.key===reciterActiveTag?' active':''}" data-tag="${t.key}">${t.label}</button>`
-    ).join('');
-  }
-
-  function renderReciterList(){
-    let list = state.reciters || [];
-    if(reciterActiveTag !== 'all') list = list.filter(r => r.tags.includes(reciterActiveTag));
-    if(reciterSearchTerm){
-      const q = reciterSearchTerm.toLowerCase();
-      list = list.filter(r => r.name.toLowerCase().includes(q));
+    try{
+      const data = await fetchJSON(`${API}/edition?format=audio&language=ar`);
+      const preferred = ['ar.alafasy','ar.abdulbasitmurattal','ar.abdurrahmaansudais','ar.minshawi','ar.mahermuaiqly','ar.husary','ar.hudhaify','ar.shaatree'];
+      data.sort((a,b)=>{
+        const ia = preferred.indexOf(a.identifier), ib = preferred.indexOf(b.identifier);
+        if(ia!==-1 && ib!==-1) return ia-ib;
+        if(ia!==-1) return -1;
+        if(ib!==-1) return 1;
+        return a.englishName.localeCompare(b.englishName);
+      });
+      reciterSelect.innerHTML = data.map(r =>
+        `<option value="${r.identifier}">${r.englishName}</option>`
+      ).join('');
+      state.reciter = data[0].identifier;
+    }catch(e){
+      reciterSelect.innerHTML = '<option value="ar.alafasy">Mishary Rashid Alafasy</option>';
+      state.reciter = 'ar.alafasy';
+      console.error(e);
     }
-    if(list.length === 0){
-      reciterList.innerHTML = '<div class="hint">Aucune voix ne correspond — essayez un autre filtre.</div>';
-      return;
-    }
-    reciterList.innerHTML = list.map(r => `
-      <div class="reciter-item${r.id===state.reciter?' active':''}" data-id="${r.id}">
-        <div>
-          <div class="rname">${r.name}</div>
-          <div class="rtags">${r.tags.map(t => RECITER_TAGS.find(x=>x.key===t)?.label || t).join(' · ')}</div>
-        </div>
-        <div class="rcheck"></div>
-      </div>
-    `).join('');
   }
-
-  reciterChips.addEventListener('click', (e)=>{
-    const btn = e.target.closest('.chip'); if(!btn) return;
-    reciterActiveTag = btn.dataset.tag;
-    renderReciterChips();
-    renderReciterList();
-  });
-
-  reciterSearch.addEventListener('input', ()=>{
-    reciterSearchTerm = reciterSearch.value.trim();
-    renderReciterList();
-  });
-
-  reciterList.addEventListener('click', (e)=>{
-    const item = e.target.closest('.reciter-item'); if(!item) return;
-    state.reciter = item.dataset.id;
-    renderReciterList();
-  });
 
   async function loadTranslations(){
     try{
@@ -1122,20 +453,12 @@
       translationSelect.innerHTML = data.map(t =>
         `<option value="${t.identifier}">[${t.language.toUpperCase()}] ${t.englishName || t.name}</option>`
       ).join('');
-      translationSelect2.innerHTML = data.map(t =>
-        `<option value="${t.identifier}">[${t.language.toUpperCase()}] ${t.englishName || t.name}</option>`
-      ).join('');
       const fr = data.find(t=>t.identifier==='fr.hamidullah') || data.find(t=>t.language==='fr') || data[0];
       translationSelect.value = fr.identifier;
       state.translation = fr.identifier;
-      const en = data.find(t=>t.identifier==='en.sahih') || data.find(t=>t.language==='en') || data[0];
-      translationSelect2.value = en.identifier;
-      state.translation2 = en.identifier;
     }catch(e){
       translationSelect.innerHTML = '<option value="fr.hamidullah">[FR] Hamidullah</option>';
-      translationSelect2.innerHTML = '<option value="en.sahih">[EN] Sahih International</option>';
       state.translation = 'fr.hamidullah';
-      state.translation2 = 'en.sahih';
       console.error(e);
     }
   }
@@ -1170,41 +493,7 @@
   }
 
   // ---------------------------------------------------------------
-  // TAJWEED — fetch color-coded segments from the Quran.com API
-  // ---------------------------------------------------------------
-  function parseTajweedHtml(html){
-    // Parses spans like <tajweed class="qalqalah">...</tajweed> into segments
-    const segments = [];
-    const re = /<tajweed class=([a-z_]+)>([^<]*)<\/tajweed>|([^<]+)/g;
-    let m;
-    let lastIndex = 0;
-    while((m = re.exec(html)) !== null){
-      if(m[1] && m[2] !== undefined){
-        segments.push({ text:m[2], cls:m[1] });
-      } else if(m[3]){
-        segments.push({ text:m[3], cls:null });
-      }
-      if(m.index === re.lastIndex) re.lastIndex++;
-    }
-    return segments;
-  }
-
-  async function fetchTajweedForSurah(surahNumber){
-    try{
-      const res = await fetch(`https://api.quran.com/api/v4/quran/verses/uthmani_tajweed?chapter_number=${surahNumber}`);
-      if(!res.ok) throw new Error('tajweed http ' + res.status);
-      const json = await res.json();
-      const map = {};
-      (json.verses || []).forEach(v => { map[v.verse_key] = v.text_uthmani_tajweed; });
-      return map;
-    }catch(e){
-      console.warn('Tajweed indisponible pour cette sourate', e);
-      return null;
-    }
-  }
-
-  // ---------------------------------------------------------------
-  // LOAD VERSES (arabic + translation(s) + optional tajweed, cached)
+  // LOAD VERSES (arabic + translation, zipped)
   // ---------------------------------------------------------------
   let loadToken = 0;
   async function loadVerses(){
@@ -1219,45 +508,22 @@
       state.fromAyah = from; state.toAyah = to;
       updateRangeHint();
 
-      const t2 = state.showSecondTranslation ? state.translation2 : null;
-      const cacheKey = `${state.selectedSurah}:${from}:${to}:${state.translation}:${t2 || ''}:${state.tajweed ? 1 : 0}`;
-
-      if(verseCache.has(cacheKey)){
-        state.verses = verseCache.get(cacheKey);
-        state.currentVerseIndex = 0;
-        verseLoading.style.display = 'none';
-        updateSizeEstimate();
-        return;
-      }
-
-      const editions = ['quran-uthmani', state.translation].concat(t2 ? [t2] : []);
-      const [data, tajweedMap] = await Promise.all([
-        fetchJSON(`${API}/surah/${state.selectedSurah}/editions/${editions.join(',')}`),
-        state.tajweed ? fetchTajweedForSurah(state.selectedSurah) : Promise.resolve(null)
-      ]);
+      const data = await fetchJSON(`${API}/surah/${state.selectedSurah}/editions/quran-uthmani,${state.translation}`);
       if(myToken !== loadToken) return; // stale
-
       const arabicEd = data[0].ayahs;
       const transEd = data[1].ayahs;
-      const trans2Ed = t2 ? data[2].ayahs : null;
       const verses = [];
       for(let i=from-1; i<=to-1 && i<arabicEd.length; i++){
-        const numberInSurah = arabicEd[i].numberInSurah;
-        const verseKey = `${state.selectedSurah}:${numberInSurah}`;
         verses.push({
-          numberInSurah,
+          numberInSurah: arabicEd[i].numberInSurah,
           globalNumber: arabicEd[i].number,
           arabic: arabicEd[i].text,
-          translation: transEd[i] ? transEd[i].text : '',
-          translation2: trans2Ed && trans2Ed[i] ? trans2Ed[i].text : '',
-          tajweedSegments: tajweedMap && tajweedMap[verseKey] ? parseTajweedHtml(tajweedMap[verseKey]) : null
+          translation: transEd[i] ? transEd[i].text : ''
         });
       }
-      verseCache.set(cacheKey, verses);
       state.verses = verses;
       state.currentVerseIndex = 0;
       verseLoading.style.display = 'none';
-      updateSizeEstimate();
     }catch(e){
       if(myToken !== loadToken) return;
       verseLoading.textContent = 'Impossible de charger ces versets — réessayez.';
@@ -1273,316 +539,6 @@
   }
 
   // ---------------------------------------------------------------
-  // CONTENT TYPE SWITCHING (Coran / Hadith / Adhkar)
-  // ---------------------------------------------------------------
-  function updateContentTypeUI(){
-    const isQuran = state.contentType === 'quran';
-    const isHadith = state.contentType === 'hadith';
-    const isAdhkar = state.contentType === 'adhkar';
-    quranSourceGroup.style.display = isQuran ? 'block' : 'none';
-    hadithSourceGroup.style.display = isHadith ? 'block' : 'none';
-    adhkarSourceGroup.style.display = isAdhkar ? 'block' : 'none';
-    reciterGroup.style.display = isQuran ? 'block' : 'none';
-    translationGroup.style.display = isQuran ? 'block' : 'none';
-    tajweedChk.closest('label').style.display = isQuran ? 'flex' : 'none';
-    if(!isQuran){ tajweedChk.checked = false; state.tajweed = false; }
-  }
-
-  contentTypeSeg.addEventListener('click', (e)=>{
-    const btn = e.target.closest('button'); if(!btn) return;
-    [...contentTypeSeg.children].forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    state.contentType = btn.dataset.type;
-    state.verses = [];
-    state.currentVerseIndex = 0;
-    updateContentTypeUI();
-    if(state.contentType === 'quran') loadVerses();
-    else if(state.contentType === 'hadith'){
-      if(state.hadithBooks.length === 0) loadHadithBooks(); else loadHadithVerses();
-    } else if(state.contentType === 'adhkar') loadAdhkarVerses();
-  });
-
-  // ---------------------------------------------------------------
-  // HADITH — dynamic editions from fawazahmed0/hadith-api (jsDelivr, no key)
-  // ---------------------------------------------------------------
-  const HADITH_API = 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1';
-  let hadithEditionsRaw = null;
-
-  async function loadHadithBooks(){
-    hadithBookSelect.innerHTML = '<option>Chargement…</option>';
-    hadithHint.textContent = '';
-    try{
-      const res = await fetch(`${HADITH_API}/editions.min.json`);
-      hadithEditionsRaw = await res.json();
-      const available = HADITH_BOOKS.filter(b => hadithEditionsRaw[b.key]);
-      state.hadithBooks = available;
-      hadithBookSelect.innerHTML = available.map(b => `<option value="${b.key}">${b.label}</option>`).join('');
-      state.hadithBook = available[0].key;
-      hadithBookSelect.value = state.hadithBook;
-      populateHadithLangs();
-      loadHadithVerses();
-    }catch(e){
-      hadithBookSelect.innerHTML = '<option value="bukhari">Sahih al-Bukhari</option>';
-      hadithLangSelect.innerHTML = '<option value="eng-bukhari">English</option>';
-      state.hadithBook = 'bukhari';
-      state.hadithLang = 'eng-bukhari';
-      hadithHint.textContent = "Impossible de charger la liste des recueils — réessayez plus tard.";
-      console.error(e);
-    }
-  }
-
-  function populateHadithLangs(){
-    if(!hadithEditionsRaw || !state.hadithBook) return;
-    const collection = hadithEditionsRaw[state.hadithBook]?.collection || [];
-    const translations = collection.filter(c => c.language !== 'Arabic');
-    const preferredLangs = ['French','English','Urdu','Indonesian','Turkish'];
-    translations.sort((a,b)=>{
-      const ia = preferredLangs.indexOf(a.language), ib = preferredLangs.indexOf(b.language);
-      if(ia!==-1 && ib!==-1) return ia-ib;
-      if(ia!==-1) return -1;
-      if(ib!==-1) return 1;
-      return a.language.localeCompare(b.language);
-    });
-    if(translations.length === 0){
-      hadithLangSelect.innerHTML = '<option value="">(traduction indisponible)</option>';
-      state.hadithLang = null;
-      return;
-    }
-    hadithLangSelect.innerHTML = translations.map(t => `<option value="${t.name}">${t.language}</option>`).join('');
-    const fr = translations.find(t=>t.language==='French') || translations[0];
-    hadithLangSelect.value = fr.name;
-    state.hadithLang = fr.name;
-  }
-
-  function hadithArabicEdition(){
-    if(!hadithEditionsRaw || !state.hadithBook) return null;
-    const collection = hadithEditionsRaw[state.hadithBook]?.collection || [];
-    const arabic = collection.find(c => c.language === 'Arabic' && !c.name.endsWith('1'))
-      || collection.find(c => c.language === 'Arabic');
-    return arabic ? arabic.name : null;
-  }
-
-  let hadithLoadToken = 0;
-  async function loadHadithVerses(){
-    const myToken = ++hadithLoadToken;
-    if(!state.hadithBook) return;
-    verseLoading.style.display = 'block';
-    verseLoading.textContent = 'Chargement du hadith…';
-    hadithHint.textContent = '';
-    try{
-      const bookMeta = HADITH_BOOKS.find(b=>b.key===state.hadithBook);
-      const from = clampInt(hadithFromInput.value, 1, bookMeta ? bookMeta.max : 9999);
-      const to = clampInt(hadithToInput.value, from, bookMeta ? bookMeta.max : 9999);
-      state.hadithFrom = from; state.hadithTo = to;
-      const span = Math.min(to - from + 1, 20); // safety cap
-      const araEd = hadithArabicEdition();
-      const transEd = state.hadithLang;
-
-      const numbers = Array.from({length: span}, (_,i) => from + i);
-      const results = await Promise.all(numbers.map(async (num) => {
-        try{
-          const [araRes, transRes] = await Promise.all([
-            araEd ? fetch(`${HADITH_API}/editions/${araEd}/${num}.min.json`) : null,
-            transEd ? fetch(`${HADITH_API}/editions/${transEd}/${num}.min.json`) : null,
-          ]);
-          const araJson = araRes && araRes.ok ? await araRes.json() : null;
-          const transJson = transRes && transRes.ok ? await transRes.json() : null;
-          const araText = araJson?.hadiths?.[0]?.text;
-          const transText = transJson?.hadiths?.[0]?.text;
-          if(!araText && !transText) return null;
-          const label = bookMeta ? bookMeta.label : state.hadithBook;
-          return {
-            arabic: araText || transText,
-            translation: araText ? (transText || '') : '',
-            translation2: '',
-            badge: `${label} · #${num}`,
-            globalNumber: null,
-            tajweedSegments: null,
-          };
-        }catch(e){ return null; }
-      }));
-      if(myToken !== hadithLoadToken) return;
-      const verses = results.filter(Boolean);
-      if(verses.length === 0){
-        hadithHint.textContent = "Aucun hadith trouvé dans cette plage — essayez d'autres numéros.";
-      }
-      state.verses = verses;
-      state.currentVerseIndex = 0;
-      verseLoading.style.display = 'none';
-      updateSizeEstimate();
-    }catch(e){
-      if(myToken !== hadithLoadToken) return;
-      verseLoading.textContent = 'Impossible de charger ce hadith — réessayez.';
-      console.error(e);
-    }
-  }
-
-  let hadithDebounce = null;
-  function debounceLoadHadith(){
-    clearTimeout(hadithDebounce);
-    hadithDebounce = setTimeout(loadHadithVerses, 450);
-  }
-
-  hadithBookSelect.addEventListener('change', ()=>{
-    state.hadithBook = hadithBookSelect.value;
-    populateHadithLangs();
-    loadHadithVerses();
-  });
-  hadithLangSelect.addEventListener('change', ()=>{
-    state.hadithLang = hadithLangSelect.value;
-    loadHadithVerses();
-  });
-  hadithFromInput.addEventListener('input', debounceLoadHadith);
-  hadithToInput.addEventListener('input', debounceLoadHadith);
-  hadithRandomBtn.addEventListener('click', ()=>{
-    const bookMeta = HADITH_BOOKS.find(b=>b.key===state.hadithBook);
-    const max = bookMeta ? bookMeta.max : 200;
-    const n = 1 + Math.floor(Math.random() * max);
-    hadithFromInput.value = n;
-    hadithToInput.value = n;
-    loadHadithVerses();
-  });
-
-  // ---------------------------------------------------------------
-  // ADHKAR — morning / evening / post-prayer remembrances
-  // ---------------------------------------------------------------
-  async function fetchAdhkarCategory(key){
-    if(adhkarCache.has(key)) return adhkarCache.get(key);
-    const cfg = ADHKAR_CATEGORIES[key];
-    const res = await fetch(cfg.url);
-    if(!res.ok) throw new Error('adhkar http ' + res.status);
-    const json = await res.json();
-    adhkarCache.set(key, json);
-    return json;
-  }
-
-  let adhkarLoadToken = 0;
-  async function loadAdhkarVerses(){
-    const myToken = ++adhkarLoadToken;
-    verseLoading.style.display = 'block';
-    verseLoading.textContent = 'Chargement des adhkar…';
-    adhkarHint.textContent = '';
-    try{
-      const data = await fetchAdhkarCategory(state.adhkarCategory);
-      if(myToken !== adhkarLoadToken) return;
-      const total = data.content.length;
-      adhkarFromInput.max = total; adhkarToInput.max = total;
-      const from = clampInt(adhkarFromInput.value, 1, total);
-      const to = clampInt(adhkarToInput.value, from, total);
-      state.adhkarFrom = from; state.adhkarTo = to;
-      const label = ADHKAR_CATEGORIES[state.adhkarCategory].label;
-      const verses = [];
-      for(let i=from-1; i<=to-1; i++){
-        const item = data.content[i];
-        if(!item) continue;
-        verses.push({
-          arabic: item.zekr,
-          translation: item.bless || '',
-          translation2: '',
-          badge: `${label} · ${i+1}/${total}${item.repeat>1 ? ' · ×'+item.repeat : ''}`,
-          globalNumber: null,
-          tajweedSegments: null,
-        });
-      }
-      adhkarHint.textContent = `${total} adhkar dans cette catégorie · ${verses.length} sélectionné(s)`;
-      state.verses = verses;
-      state.currentVerseIndex = 0;
-      verseLoading.style.display = 'none';
-      updateSizeEstimate();
-    }catch(e){
-      if(myToken !== adhkarLoadToken) return;
-      verseLoading.textContent = 'Impossible de charger ces adhkar — réessayez.';
-      console.error(e);
-    }
-  }
-
-  let adhkarDebounce = null;
-  function debounceLoadAdhkar(){
-    clearTimeout(adhkarDebounce);
-    adhkarDebounce = setTimeout(loadAdhkarVerses, 400);
-  }
-
-  adhkarCategorySelect.addEventListener('change', ()=>{
-    state.adhkarCategory = adhkarCategorySelect.value;
-    loadAdhkarVerses();
-  });
-  adhkarFromInput.addEventListener('input', debounceLoadAdhkar);
-  adhkarToInput.addEventListener('input', debounceLoadAdhkar);
-
-  // ---------------------------------------------------------------
-  // NASHEED — user-supplied background audio track
-  // ---------------------------------------------------------------
-  nasheedFileBtn.addEventListener('click', ()=> nasheedFileInput.click());
-  nasheedFileInput.addEventListener('change', ()=>{
-    const f = nasheedFileInput.files[0]; if(!f) return;
-    state.nasheedUrl = URL.createObjectURL(f);
-    nasheedPlayer.src = state.nasheedUrl;
-    nasheedFileBtn.textContent = '✓ ' + f.name;
-    nasheedFileBtn.classList.add('filled');
-    nasheedVolumeField.style.display = 'block';
-  });
-  nasheedVolumeInput.addEventListener('input', ()=>{
-    state.nasheedVolume = parseFloat(nasheedVolumeInput.value);
-    nasheedVolumeValue.textContent = Math.round(state.nasheedVolume*100) + '%';
-    if(nasheedGainNode) nasheedGainNode.gain.value = state.nasheedVolume;
-    nasheedPlayer.volume = state.nasheedVolume;
-  });
-
-
-  // VERSE SEARCH — search by keyword across the whole Quran
-  // ---------------------------------------------------------------
-  let searchDebounce = null;
-  verseSearchInput.addEventListener('input', ()=>{
-    clearTimeout(searchDebounce);
-    const q = verseSearchInput.value.trim();
-    if(q.length < 3){
-      verseSearchResults.innerHTML = '';
-      verseSearchHint.textContent = q.length ? 'Continuez à taper (3 caractères min.)…' : '';
-      return;
-    }
-    verseSearchHint.textContent = 'Recherche…';
-    searchDebounce = setTimeout(()=> runVerseSearch(q), 500);
-  });
-
-  async function runVerseSearch(query){
-    if(!state.translation) return;
-    try{
-      const data = await fetchJSON(`${API}/search/${encodeURIComponent(query)}/all/${state.translation}`);
-      const matches = (data.matches || []).slice(0, 12);
-      if(matches.length === 0){
-        verseSearchHint.textContent = 'Aucun résultat trouvé.';
-        verseSearchResults.innerHTML = '';
-        return;
-      }
-      verseSearchHint.textContent = `${data.count} résultat(s) — ${matches.length} affiché(s)`;
-      verseSearchResults.innerHTML = matches.map(m => `
-        <div class="search-result-item" data-surah="${m.surah.number}" data-ayah="${m.numberInSurah}">
-          <b>${m.surah.englishName} ${m.surah.number}:${m.numberInSurah}</b> — ${m.text.slice(0, 90)}${m.text.length>90?'…':''}
-        </div>
-      `).join('');
-    }catch(e){
-      verseSearchHint.textContent = "Recherche indisponible pour le moment.";
-      verseSearchResults.innerHTML = '';
-      console.error(e);
-    }
-  }
-
-  verseSearchResults.addEventListener('click', (e)=>{
-    const item = e.target.closest('.search-result-item');
-    if(!item) return;
-    const surahNum = parseInt(item.dataset.surah, 10);
-    const ayahNum = parseInt(item.dataset.ayah, 10);
-    surahSelect.value = surahNum;
-    onSurahChange();
-    fromAyahInput.value = ayahNum;
-    toAyahInput.value = ayahNum;
-    verseSearchInput.value = '';
-    verseSearchResults.innerHTML = '';
-    verseSearchHint.textContent = '';
-    loadVerses();
-  });
-
-  // ---------------------------------------------------------------
   // BACKGROUND MODE / UPLOADS
   // ---------------------------------------------------------------
   const bgModeGrid = el('bgModeGrid');
@@ -1594,10 +550,11 @@
   bgModeGrid.addEventListener('click', (e)=>{
     const card = e.target.closest('.bgmode');
     if(!card) return;
-    setActiveMode(card.dataset.mode);
-    [...libGrid.children].forEach(c=>c.classList.remove('active'));
-    state.activePresetUrl = null;
-    libHint.textContent = '';
+    [...bgModeGrid.children].forEach(c=>c.classList.remove('active'));
+    card.classList.add('active');
+    state.bgMode = card.dataset.mode;
+    imgFileBtn.style.display = state.bgMode === 'image' ? 'block' : 'none';
+    vidFileBtn.style.display = state.bgMode === 'video' ? 'block' : 'none';
   });
 
   imgFileBtn.addEventListener('click', ()=> imgFile.click());
@@ -1610,7 +567,6 @@
     img.src = URL.createObjectURL(f);
     imgFileBtn.textContent = '✓ ' + f.name;
     imgFileBtn.classList.add('filled');
-    state.activePresetUrl = null;
   });
 
   vidFile.addEventListener('change', ()=>{
@@ -1622,77 +578,6 @@
     state.videoEl = v;
     vidFileBtn.textContent = '✓ ' + f.name;
     vidFileBtn.classList.add('filled');
-    state.activePresetUrl = null;
-  });
-
-  // ---------------------------------------------------------------
-  // PRESET BACKGROUND LIBRARY
-  // ---------------------------------------------------------------
-  const libGrid = el('libGrid');
-  const libHint = el('libHint');
-
-  function renderLibGrid(){
-    libGrid.innerHTML = PRESET_BACKGROUNDS.map((p, i) => `
-      <div class="lib-item" data-index="${i}" style="background-image:url('${p.thumb}')" title="${p.label}">
-        ${p.type === 'video' ? '<svg class="playicon" viewBox="0 0 24 24"><polygon points="7,5 20,12 7,19" fill="#e6cb84"/></svg>' : ''}
-        <span>${p.label}</span>
-      </div>
-    `).join('');
-  }
-  renderLibGrid();
-
-  function setActiveMode(mode){
-    [...bgModeGrid.children].forEach(c=>c.classList.remove('active'));
-    const target = [...bgModeGrid.children].find(c=>c.dataset.mode===mode);
-    if(target) target.classList.add('active');
-    state.bgMode = mode;
-    imgFileBtn.style.display = mode === 'image' ? 'block' : 'none';
-    vidFileBtn.style.display = mode === 'video' ? 'block' : 'none';
-  }
-
-  libGrid.addEventListener('click', (e)=>{
-    const item = e.target.closest('.lib-item');
-    if(!item) return;
-    const preset = PRESET_BACKGROUNDS[parseInt(item.dataset.index, 10)];
-    if(!preset) return;
-
-    [...libGrid.children].forEach(c=>c.classList.remove('active'));
-    item.classList.add('active');
-    libHint.textContent = 'Chargement du fond…';
-    libHint.className = 'hint';
-    state.activePresetUrl = preset.url;
-
-    if(preset.type === 'image'){
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = ()=>{
-        if(state.activePresetUrl !== preset.url) return; // user picked something else meanwhile
-        state.imageEl = img;
-        setActiveMode('image');
-        libHint.textContent = '';
-      };
-      img.onerror = ()=>{
-        libHint.textContent = "Ce fond n'a pas pu être chargé — essayez-en un autre.";
-        libHint.className = 'hint err';
-      };
-      img.src = preset.url;
-    } else {
-      const v = document.createElement('video');
-      v.crossOrigin = 'anonymous';
-      v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true;
-      v.oncanplay = ()=>{
-        if(state.activePresetUrl !== preset.url) return;
-        state.videoEl = v;
-        setActiveMode('video');
-        libHint.textContent = '';
-      };
-      v.onerror = ()=>{
-        libHint.textContent = "Cette vidéo n'a pas pu être chargée — essayez-en une autre.";
-        libHint.className = 'hint err';
-      };
-      v.src = preset.url;
-      v.play().catch(()=>{});
-    }
   });
 
   // ---------------------------------------------------------------
@@ -1706,27 +591,10 @@
     resizeCanvas();
   });
 
-  const FORMAT_SIZES = {
-    '9:16': [1080, 1920],  // TikTok / Reels / Shorts
-    '16:9': [1920, 1080],  // YouTube
-    '1:1':  [1080, 1080],  // Post carré Instagram/Facebook
-    '4:5':  [1080, 1350],  // Post portrait Instagram
-  };
-
   function resizeCanvas(){
-    const [w, h] = FORMAT_SIZES[state.format] || FORMAT_SIZES['9:16'];
-    canvas.width = w; canvas.height = h;
-    applyDisplaySize();
+    if(state.format === '9:16'){ canvas.width = 608; canvas.height = 1080; }
+    else { canvas.width = 900; canvas.height = 900; }
   }
-
-  // Garde l'aperçu compact à l'écran quelle que soit la résolution interne
-  function applyDisplaySize(){
-    const maxW = 300, maxH = 460;
-    const ratio = Math.min(maxW / canvas.width, maxH / canvas.height, 1);
-    canvas.style.width = Math.round(canvas.width * ratio) + 'px';
-    canvas.style.height = Math.round(canvas.height * ratio) + 'px';
-  }
-  window.addEventListener('resize', applyDisplaySize);
 
   // ---------------------------------------------------------------
   // DRAWING — backgrounds
@@ -1883,7 +751,7 @@
     let size = startSize;
     let lines;
     do{
-      lines = wrapText(text, `${weight} ${size}px "${family}"`, maxWidth);
+      lines = wrapText(text, `${weight} ${size}px ${family}`, maxWidth);
       if(lines.length <= maxLines) break;
       size -= 4;
     } while(size > minSize);
@@ -1900,108 +768,6 @@
     ctx.closePath();
   }
 
-  // ---------------------------------------------------------------
-  // TAJWEED / KARAOKE — word-aware colored RTL line layout
-  // ---------------------------------------------------------------
-  function computeWordColors(verse){
-    if(!verse.tajweedSegments) return null;
-    const wordColorMap = [];
-    let currentWordChunks = [];
-    for(const seg of verse.tajweedSegments){
-      const color = seg.cls ? (TAJWEED_COLORS[seg.cls] || null) : null;
-      const parts = seg.text.split(' ');
-      parts.forEach((part, idx) => {
-        if(part.length) currentWordChunks.push({text:part, color});
-        if(idx < parts.length - 1){
-          wordColorMap.push(currentWordChunks);
-          currentWordChunks = [];
-        }
-      });
-    }
-    if(currentWordChunks.length) wordColorMap.push(currentWordChunks);
-    return wordColorMap.map(chunks => {
-      const colored = chunks.filter(c=>c.color);
-      if(colored.length === 0) return null;
-      colored.sort((a,b)=> b.text.length - a.text.length);
-      return colored[0].color;
-    });
-  }
-
-  function wrapColoredWords(words, colors, font, maxWidth){
-    ctx.font = font;
-    const lines = [];
-    let line = [];
-    let lineWidth = 0;
-    const spaceWidth = ctx.measureText(' ').width;
-    for(let i=0;i<words.length;i++){
-      const wWidth = ctx.measureText(words[i]).width;
-      const testWidth = lineWidth + (line.length?spaceWidth:0) + wWidth;
-      if(testWidth > maxWidth && line.length){
-        lines.push(line);
-        line = [{word:words[i], color:colors ? colors[i] : null, index:i}];
-        lineWidth = wWidth;
-      } else {
-        line.push({word:words[i], color:colors ? colors[i] : null, index:i});
-        lineWidth = testWidth;
-      }
-    }
-    if(line.length) lines.push(line);
-    return lines;
-  }
-
-  function drawColoredArabicLine(line, cy, cx, font, defaultColor, karaokeIndex){
-    ctx.font = font;
-    ctx.textAlign = 'right';
-    const spaceWidth = ctx.measureText(' ').width;
-    const widths = line.map(tok => ctx.measureText(tok.word).width);
-    const totalWidth = widths.reduce((a,b)=>a+b,0) + spaceWidth*(line.length-1);
-    let x = cx + totalWidth/2;
-    for(let i=0;i<line.length;i++){
-      const tok = line[i];
-      let color = tok.color || defaultColor;
-      let alpha = 1;
-      if(karaokeIndex >= 0){
-        if(tok.index > karaokeIndex) alpha = 0.4;
-        else if(tok.index === karaokeIndex) color = state.accentColor;
-      }
-      ctx.globalAlpha = alpha;
-      ctx.fillStyle = color;
-      ctx.fillText(tok.word, x, cy);
-      x -= widths[i] + spaceWidth;
-    }
-    ctx.globalAlpha = 1;
-    ctx.textAlign = 'center';
-  }
-
-  function getKaraokeWordIndex(totalWords){
-    if(!state.karaoke || totalWords <= 0) return -1;
-    const dur = audioPlayer.duration;
-    let progress;
-    if(dur && isFinite(dur) && dur > 0 && !audioPlayer.paused){
-      progress = Math.min(1, audioPlayer.currentTime / dur);
-    } else {
-      const elapsed = performance.now() - state.verseChangedAt;
-      const verse = state.verses[state.currentVerseIndex];
-      const estDur = estimateDurationMs(verse ? verse.arabic : '') / state.speed;
-      progress = Math.min(1, elapsed / estDur);
-    }
-    return Math.min(totalWords - 1, Math.floor(progress * totalWords));
-  }
-
-  function drawBasmalaFrame(t, w, h, cx){
-    const fadeMs = 480;
-    const fadeAlpha = Math.min(1, (t - state.verseChangedAt) / fadeMs);
-    ctx.save();
-    ctx.globalAlpha = fadeAlpha;
-    ctx.direction = 'rtl';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = state.arabicColor;
-    ctx.font = `700 ${Math.round(w*0.075)}px "${state.arabicFont}"`;
-    ctx.fillText('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', cx, h/2 + Math.round(w*0.075)*0.35);
-    ctx.direction = 'ltr';
-    ctx.restore();
-  }
-
   function drawForeground(t){
     const w = canvas.width, h = canvas.height;
 
@@ -2014,138 +780,72 @@
     ctx.fillStyle = scrim;
     ctx.fillRect(0,0,w,h);
 
-    const cx = w/2;
-
-    if(state.showingBasmalaFrame){
-      drawBasmalaFrame(t, w, h, cx);
-      drawStar(w*0.09, h*0.065, w*0.045, t/9000, state.accentColor, 0.85, 2);
-      drawStar(w*0.91, h*0.065, w*0.045, -t/9000, state.accentColor, 0.85, 2);
-      if(state.watermarkText){
-        ctx.font = `600 ${Math.round(w*0.022)}px "${state.translationFont}"`;
-        ctx.fillStyle = 'rgba(245,241,230,0.32)';
-        ctx.textAlign = 'left';
-        ctx.fillText(state.watermarkText, w*0.055, h*0.965);
-        ctx.textAlign = 'center';
-      }
-      return;
-    }
-
-    const s = state.contentType === 'quran' ? state.surahs.find(x=>x.number == state.selectedSurah) : null;
+    const s = state.surahs.find(x=>x.number == state.selectedSurah);
     const verse = state.verses[state.currentVerseIndex];
-    if((state.contentType === 'quran' && !s) || !verse) return;
+    if(!s || !verse) return;
 
     const maxTextWidth = w*0.84;
+    const cx = w/2;
 
-    // smooth crossfade whenever the verse changes, instead of an abrupt cut
-    const fadeMs = 480;
-    const fadeAlpha = Math.min(1, (t - state.verseChangedAt) / fadeMs);
-    const eased = 1 - Math.pow(1 - fadeAlpha, 3); // ease-out cubic
-    const liftPx = (1 - eased) * (h * 0.018);
-    ctx.save();
-    ctx.globalAlpha = eased;
-    ctx.translate(0, liftPx);
-
-    const useColoredLayout = state.tajweed || state.karaoke;
-    const arabicWords = verse.arabic.split(' ');
-    const wordColors = state.tajweed ? computeWordColors(verse) : null;
-
+    // Arabic verse
     ctx.direction = 'rtl';
     ctx.textAlign = 'center';
-    ctx.fillStyle = state.arabicColor;
-    const arFit = fitText(verse.arabic, state.arabicFont, 700, maxTextWidth, 7,
-      Math.round(w*0.084*state.arabicTextScale), Math.round(w*0.04*state.arabicTextScale));
-    const arabicFontSpec = `700 ${arFit.size}px "${state.arabicFont}"`;
-    const coloredLines = useColoredLayout ? wrapColoredWords(arabicWords, wordColors, arabicFontSpec, maxTextWidth) : null;
-
-    const gapPx = w*0.028 * state.verseGap;
+    ctx.fillStyle = '#f5f1e6';
+    const arFit = fitText(verse.arabic, 'Amiri', 700, maxTextWidth, 7, Math.round(w*0.084), Math.round(w*0.04));
     let totalBlockH = arFit.lines.length * arFit.size * 1.5;
-    let transFit = null, trans2Fit = null;
+    let transFit = null;
     if(state.showTranslation && verse.translation){
-      transFit = fitText(verse.translation, state.translationFont, 500, maxTextWidth, 5,
-        Math.round(w*0.036*state.translationTextScale), Math.round(w*0.024*state.translationTextScale));
-      totalBlockH += gapPx + transFit.lines.length * transFit.size * 1.45;
-    }
-    if(state.showSecondTranslation && verse.translation2){
-      trans2Fit = fitText(verse.translation2, state.translationFont, 500, maxTextWidth, 5,
-        Math.round(w*0.032*state.translationTextScale), Math.round(w*0.022*state.translationTextScale));
-      totalBlockH += gapPx*0.7 + trans2Fit.lines.length * trans2Fit.size * 1.4;
+      transFit = fitText(verse.translation, 'Manrope', 500, maxTextWidth, 5, Math.round(w*0.036), Math.round(w*0.024));
+      totalBlockH += 26 + transFit.lines.length * transFit.size * 1.45;
     }
 
-    // vertical placement per state.textPosition
-    let cy;
-    if(state.textPosition === 'top') cy = h*0.16;
-    else if(state.textPosition === 'bottom') cy = h - totalBlockH - h*0.17;
-    else cy = h/2 - totalBlockH/2;
+    let cy = h/2 - totalBlockH/2;
 
-    const karaokeIndex = getKaraokeWordIndex(arabicWords.length);
-
-    ctx.font = arabicFontSpec;
+    ctx.font = `700 ${arFit.size}px Amiri`;
     ctx.direction = 'rtl';
-    if(useColoredLayout){
-      for(const line of coloredLines){
-        cy += arFit.size*1.5;
-        drawColoredArabicLine(line, cy, cx, arabicFontSpec, state.arabicColor, karaokeIndex);
-      }
-    } else {
-      for(const line of arFit.lines){
-        cy += arFit.size*1.5;
-        ctx.fillText(line, cx, cy);
-      }
+    for(const line of arFit.lines){
+      cy += arFit.size*1.5;
+      ctx.fillText(line, cx, cy);
     }
 
     if(transFit){
-      cy += gapPx;
+      cy += 30;
       ctx.direction = 'ltr';
-      ctx.font = `500 ${transFit.size}px "${state.translationFont}"`;
-      ctx.fillStyle = state.translationColor;
+      ctx.font = `500 ${transFit.size}px Manrope`;
+      ctx.fillStyle = '#cfe3dc';
       for(const line of transFit.lines){
         cy += transFit.size*1.45;
         ctx.fillText(line, cx, cy);
       }
     }
-    if(trans2Fit){
-      cy += gapPx*0.7;
-      ctx.direction = 'ltr';
-      ctx.font = `italic 500 ${trans2Fit.size}px "${state.translationFont}"`;
-      ctx.fillStyle = state.translationColor;
-      ctx.globalAlpha = eased * 0.82;
-      for(const line of trans2Fit.lines){
-        cy += trans2Fit.size*1.4;
-        ctx.fillText(line, cx, cy);
-      }
-      ctx.globalAlpha = eased;
-    }
     ctx.direction = 'ltr';
 
     // badge: surah:ayah
-    const badgeText = verse.badge || `${s.englishName} · ${verse.numberInSurah}/${s.numberOfAyahs}`;
-    ctx.font = `700 ${Math.round(w*0.03)}px "${state.translationFont}"`;
+    const badgeText = `${s.englishName} · ${verse.numberInSurah}/${s.numberOfAyahs}`;
+    ctx.font = `700 ${Math.round(w*0.03)}px Manrope`;
     const bw = ctx.measureText(badgeText).width + 34;
     const bh = Math.round(w*0.03) + 20;
     const by = h - bh - Math.round(h*0.055);
     roundRect(cx-bw/2, by, bw, bh, bh/2);
     ctx.fillStyle = 'rgba(12,38,34,0.55)';
     ctx.fill();
-    ctx.strokeStyle = state.accentColor;
+    ctx.strokeStyle = '#c9a24b';
     ctx.lineWidth = 1.2;
     ctx.stroke();
-    ctx.fillStyle = state.accentColor;
+    ctx.fillStyle = '#e6cb84';
     ctx.textAlign = 'center';
     ctx.fillText(badgeText, cx, by + bh/2 + Math.round(w*0.03)*0.34);
-    ctx.restore(); // end crossfade block
 
     // corner ornaments baked into export
-    drawStar(w*0.09, h*0.065, w*0.045, t/9000, state.accentColor, 0.85, 2);
-    drawStar(w*0.91, h*0.065, w*0.045, -t/9000, state.accentColor, 0.85, 2);
+    drawStar(w*0.09, h*0.065, w*0.045, t/9000, '#c9a24b', 0.85, 2);
+    drawStar(w*0.91, h*0.065, w*0.045, -t/9000, '#c9a24b', 0.85, 2);
 
-    // brand watermark — kept subtle on purpose ("pas trop visible")
-    if(state.watermarkText){
-      ctx.font = `600 ${Math.round(w*0.022)}px "${state.translationFont}"`;
-      ctx.fillStyle = 'rgba(245,241,230,0.32)';
-      ctx.textAlign = 'left';
-      ctx.fillText(state.watermarkText, w*0.055, h*0.965);
-      ctx.textAlign = 'center';
-    }
+    // brand watermark
+    ctx.font = `700 ${Math.round(w*0.024)}px Manrope`;
+    ctx.fillStyle = 'rgba(245,241,230,0.55)';
+    ctx.textAlign = 'left';
+    ctx.fillText('Quran Studio', w*0.055, h*0.965);
+    ctx.textAlign = 'center';
   }
 
   // ---------------------------------------------------------------
@@ -2170,225 +870,52 @@
   startLoop();
 
   // ---------------------------------------------------------------
-  // AUDIO — two paths:
-  //  1) audioPlayer: plain native playback, no CORS needed, always
-  //     audible and drives the verse-by-verse timing.
-  //  2) For recording, narration audio is fetched as raw bytes and
-  //     decoded locally (fetch + decodeAudioData) instead of routed
-  //     through a <audio crossorigin> element. This matters: a tainted
-  //     cross-origin media element can still be heard live (browsers
-  //     allow that) but produces SILENT audio once captured into a
-  //     MediaStreamDestination — with no error anywhere, which is
-  //     exactly the "preview has sound, export doesn't" symptom.
-  //     Fetching bytes directly either fails cleanly (we can warn) or
-  //     succeeds with fully decoded, never-tainted PCM data.
+  // AUDIO GRAPH (Web Audio, built once on first user gesture)
   // ---------------------------------------------------------------
-  let audioCtxRef = null, destNode = null, graphReady = false;
-  let nasheedSourceNode = null, nasheedGainNode = null, nasheedGraphReady = false;
-  let narrationCaptureWarned = false;
-
+  let audioCtxRef = null, sourceNode = null, destNode = null, graphReady = false;
   function ensureAudioGraph(){
-    if(!audioCtxRef){
-      try{ audioCtxRef = new (window.AudioContext || window.webkitAudioContext)(); }
-      catch(e){ console.error('AudioContext unavailable', e); return; }
-    }
-    if(!graphReady){
-      try{
-        destNode = audioCtxRef.createMediaStreamDestination();
-        graphReady = true;
-      }catch(e){ console.error('Recording audio graph unavailable, export will be silent', e); }
-    }
-    if(!nasheedGraphReady && state.nasheedUrl){
-      try{
-        nasheedSourceNode = audioCtxRef.createMediaElementSource(nasheedPlayer);
-        nasheedGainNode = audioCtxRef.createGain();
-        nasheedGainNode.gain.value = state.nasheedVolume;
-        nasheedSourceNode.connect(nasheedGainNode);
-        nasheedGainNode.connect(audioCtxRef.destination); // audible while working
-        if(destNode) nasheedGainNode.connect(destNode);   // also captured in export
-        nasheedGraphReady = true;
-      }catch(e){ console.error('Nasheed audio graph unavailable', e); }
-    }
-  }
-
-  // Fetches and decodes narration audio for capture into the recording.
-  // Routed through our own /api/audio-proxy Vercel function, since the
-  // upstream CDN sends no Access-Control-Allow-Origin header — capturing
-  // it directly is blocked by the browser regardless of technique. Going
-  // through our own origin sidesteps CORS entirely.
-  // Returns an AudioBuffer on success, or null if unreachable.
-  async function fetchNarrationBuffer(globalNumber){
-    try{
-      const proxyUrl = `/api/audio-proxy?reciter=${encodeURIComponent(state.reciter)}&ayah=${globalNumber}`;
-      const res = await fetch(proxyUrl, { cache:'no-store' });
-      if(!res.ok) return null;
-      const arrayBuffer = await res.arrayBuffer();
-      return await audioCtxRef.decodeAudioData(arrayBuffer);
-    }catch(e){
-      console.warn('Capture audio impossible pour cette piste (proxy indisponible ?) :', e);
-      return null;
-    }
-  }
-
-  function playNarrationBuffer(buffer){
-    if(!buffer || !destNode) return;
-    try{
-      const src = audioCtxRef.createBufferSource();
-      src.buffer = buffer;
-      src.playbackRate.value = state.speed;
-      src.connect(destNode);
-      src.start();
-    }catch(e){ console.warn('Lecture du buffer de capture impossible', e); }
-  }
-
-  function startNasheed(){
-    if(!state.nasheedUrl) return;
-    try{
-      nasheedPlayer.currentTime = 0;
-      if(!nasheedGraphReady) nasheedPlayer.volume = state.nasheedVolume; // fallback path
-      nasheedPlayer.play().catch(()=>{});
-    }catch(e){ /* ignore */ }
-  }
-  function stopNasheed(){
-    try{ nasheedPlayer.pause(); }catch(e){ /* ignore */ }
+    if(graphReady) return;
+    audioCtxRef = new (window.AudioContext || window.webkitAudioContext)();
+    sourceNode = audioCtxRef.createMediaElementSource(audioPlayer);
+    destNode = audioCtxRef.createMediaStreamDestination();
+    sourceNode.connect(destNode);
+    sourceNode.connect(audioCtxRef.destination);
+    graphReady = true;
   }
 
   function audioUrlFor(globalNumber){
     return `${AUDIO_CDN}/${state.reciter}/${globalNumber}.mp3`;
   }
 
-  function estimateDurationMs(arabicText){
-    // fallback pacing if the mp3 truly can't be reached, or when the
-    // content type (hadith/adhkar) simply has no recitation audio at all
-    return Math.max(1800, Math.min(9000, arabicText.length * 95));
-  }
-
-  function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
-
-  let audioUnlocked = false;
-  let cancelResolvers = [];
-  function requestCancel(){
-    state.cancelRequested = true;
-    try{ audioPlayer.pause(); }catch(e){}
-    cancelResolvers.forEach(fn=>fn());
-    cancelResolvers = [];
-  }
-
-  function playOnce(el, url){
+  function playAyah(globalNumber){
     return new Promise((resolve)=>{
       let done = false;
       const finish = ()=>{ if(done) return; done = true; cleanup(); resolve(); };
       const cleanup = ()=>{
-        el.removeEventListener('ended', finish);
-        el.removeEventListener('error', finish);
+        audioPlayer.removeEventListener('ended', finish);
+        audioPlayer.removeEventListener('error', finish);
       };
-      el.addEventListener('ended', finish, {once:true});
-      el.addEventListener('error', finish, {once:true});
-      cancelResolvers.push(finish);
-      try{
-        el.src = url;
-        el.load();
-        const p = el.play();
-        if(p && typeof p.catch === 'function'){
-          p.then(()=>{ audioUnlocked = true; })
-           .catch((err)=>{
-              console.warn('Lecture audio refusée par le navigateur:', err && err.name);
-              if(err && err.name === 'NotAllowedError'){ showUnlockPrompt(); }
-              finish();
-            });
-        } else {
-          audioUnlocked = true;
-        }
-      }catch(err){
-        console.error('Erreur lors du lancement de la lecture audio:', err);
-        finish();
-      }
-      setTimeout(()=>{ if(!done) finish(); }, 25000);
+      audioPlayer.addEventListener('ended', finish);
+      audioPlayer.addEventListener('error', finish);
+      audioPlayer.src = audioUrlFor(globalNumber);
+      audioPlayer.currentTime = 0;
+      audioPlayer.play().catch(finish);
+      // safety timeout in case metadata never resolves
+      setTimeout(()=>{ if(!done && audioPlayer.ended) finish(); }, 25000);
     });
   }
 
-  // Certains navigateurs (surtout mobile/Safari) bloquent la lecture tant
-  // qu'ils n'ont pas vu un vrai tap direct sur un contrôle audio. Si on
-  // détecte ce blocage, on affiche un bouton explicite pour débloquer le son.
-  const unlockBtn = document.createElement('button');
-  unlockBtn.textContent = '🔊 Activer le son puis continuer';
-  unlockBtn.className = 'primary';
-  unlockBtn.style.cssText = 'display:none;position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:50;';
-  document.body.appendChild(unlockBtn);
-  function showUnlockPrompt(){
-    if(audioUnlocked) return;
-    unlockBtn.style.display = 'flex';
-  }
-  unlockBtn.addEventListener('click', ()=>{
-    audioPlayer.muted = false;
-    audioPlayer.play().then(()=>{ audioUnlocked = true; }).catch(()=>{});
-    unlockBtn.style.display = 'none';
-  });
-
-  async function playAyah(globalNumber, verseText){
-    if(!globalNumber){
-      // Pas de récitation audio disponible pour ce contenu (hadith/adhkar) :
-      // on garde un rythme naturel basé sur la longueur du texte.
-      await sleep(estimateDurationMs(verseText || '') / state.speed);
-      return;
-    }
-    const url = audioUrlFor(globalNumber);
-
-    // Capture pour l'export : lancée en parallèle, JAMAIS attendue avant la
-    // lecture audible/native ci-dessous — un réseau lent sur cette requête
-    // ne doit jamais retarder ou décaler le rythme réel de la vidéo.
-    if(state.isRecording && graphReady){
-      fetchNarrationBuffer(globalNumber).then(buffer => {
-        if(buffer){
-          playNarrationBuffer(buffer);
-        } else if(!narrationCaptureWarned){
-          narrationCaptureWarned = true;
-          progressText.textContent = "Capture audio indisponible (proxy /api/audio-proxy injoignable) — la vidéo sera exportée sans narration.";
-        }
-      });
-    }
-
-    audioPlayer.playbackRate = state.speed;
-    await playOnce(audioPlayer, url);
-    if(audioPlayer.error){
-      // one retry in case of a transient network hiccup
-      await playOnce(audioPlayer, url);
-    }
-    if(audioPlayer.error){
-      // give up on this ayah's audio, keep pacing natural instead of skipping instantly
-      await sleep(estimateDurationMs(verseText || '') / state.speed);
-    }
-  }
-
-  async function showBasmalaFrame(){
-    state.showingBasmalaFrame = true;
-    state.verseChangedAt = performance.now();
-    await sleep(2200 / state.speed);
-    state.showingBasmalaFrame = false;
-  }
+  function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
 
   // ---------------------------------------------------------------
   // RUN THROUGH VERSES (shared by preview + export)
   // ---------------------------------------------------------------
   async function runThroughVerses(onStep){
-    state.cancelRequested = false;
-    startNasheed();
-    try{
-      if(state.contentType === 'quran' && state.basmala && state.selectedSurah !== 9){
-        if(onStep) onStep(-1, null);
-        await showBasmalaFrame();
-        if(state.cancelRequested) return;
-      }
-      for(let i=0;i<state.verses.length;i++){
-        if(state.cancelRequested) return;
-        state.currentVerseIndex = i;
-        state.verseChangedAt = performance.now();
-        const v = state.verses[i];
-        if(onStep) onStep(i, v);
-        await playAyah(v.globalNumber, v.arabic);
-      }
-    } finally {
-      stopNasheed();
+    for(let i=0;i<state.verses.length;i++){
+      state.currentVerseIndex = i;
+      const v = state.verses[i];
+      if(onStep) onStep(i, v);
+      await playAyah(v.globalNumber);
     }
   }
 
@@ -2398,276 +925,89 @@
   previewBtn.addEventListener('click', async ()=>{
     if(state.verses.length === 0 || state.isRecording) return;
     ensureAudioGraph();
-    if(audioCtxRef && audioCtxRef.state === 'suspended') await audioCtxRef.resume();
     previewBtn.disabled = true; generateBtn.disabled = true;
     progressWrap.style.display = 'block';
-    cancelBtn.style.display = 'block';
     try{
       await runThroughVerses((i,v)=>{
-        const label = i === -1 ? 'Basmala' : `Verset ${i+1}/${state.verses.length}`;
-        const pct = i === -1 ? 0 : Math.round((i/state.verses.length)*100);
-        progressText.textContent = label;
-        progressPct.textContent = pct + '%';
-        progressFill.style.width = pct + '%';
+        progressText.textContent = `Verset ${i+1}/${state.verses.length}`;
+        progressPct.textContent = Math.round(((i)/state.verses.length)*100) + '%';
+        progressFill.style.width = Math.round(((i)/state.verses.length)*100) + '%';
       });
-      if(state.cancelRequested){
-        progressText.textContent = 'Aperçu annulé';
-      } else {
-        progressFill.style.width = '100%';
-        progressPct.textContent = '100%';
-        progressText.textContent = 'Aperçu terminé';
-      }
+      progressFill.style.width = '100%';
+      progressPct.textContent = '100%';
+      progressText.textContent = 'Aperçu terminé';
     } finally {
       previewBtn.disabled = false; generateBtn.disabled = false;
-      cancelBtn.style.display = 'none';
       setTimeout(()=>{ progressWrap.style.display = 'none'; }, 1200);
     }
   });
 
-  cancelBtn.addEventListener('click', requestCancel);
-
   // ---------------------------------------------------------------
-  // GENERATE & EXPORT VIDEO (.mp4, bonne qualité)
+  // GENERATE & EXPORT VIDEO
   // ---------------------------------------------------------------
   function pickMimeType(){
-    // On tente d'abord un vrai enregistrement natif en .mp4 (Safari/iOS le
-    // supportent nativement). Si le navigateur ne sait pas, on se rabat sur
-    // .webm puis on convertit en .mp4 via ffmpeg.wasm après l'enregistrement.
-    const mp4Options = [
-      'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
-      'video/mp4;codecs=h264,aac',
-      'video/mp4'
-    ];
-    for(const o of mp4Options){ if(window.MediaRecorder && MediaRecorder.isTypeSupported(o)) return {mimeType:o, isMp4:true}; }
-    const webmOptions = [
+    const options = [
       'video/webm;codecs=vp9,opus',
       'video/webm;codecs=vp8,opus',
       'video/webm'
     ];
-    for(const o of webmOptions){ if(window.MediaRecorder && MediaRecorder.isTypeSupported(o)) return {mimeType:o, isMp4:false}; }
-    return {mimeType:'', isMp4:false};
+    for(const o of options){ if(window.MediaRecorder && MediaRecorder.isTypeSupported(o)) return o; }
+    return '';
   }
-
-  // ffmpeg.wasm est chargé eagerly (petit loader) mais son "core" (~25 Mo)
-  // n'est téléchargé que la première fois qu'une conversion est réellement
-  // nécessaire, pour ne pas alourdir le chargement de la page.
-  let ffmpegInstance = null;
-  async function getFfmpeg(){
-    if(ffmpegInstance) return ffmpegInstance;
-    const { createFFmpeg } = FFmpeg;
-    ffmpegInstance = createFFmpeg({
-      log:false,
-      corePath:'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js'
-    });
-    await ffmpegInstance.load();
-    return ffmpegInstance;
-  }
-
-  async function convertWebmToMp4(webmBlob, onProgress){
-    const { fetchFile } = FFmpeg;
-    const ffmpeg = await getFfmpeg();
-    ffmpeg.setProgress(({ratio}) => { if(ratio >= 0 && ratio <= 1) onProgress(ratio); });
-    ffmpeg.FS('writeFile', 'input.webm', await fetchFile(webmBlob));
-    await ffmpeg.run(
-      '-i', 'input.webm',
-      '-c:v', 'libx264', '-preset', 'fast', '-crf', '19', '-pix_fmt', 'yuv420p',
-      '-c:a', 'aac', '-b:a', '160k',
-      '-movflags', '+faststart',
-      'output.mp4'
-    );
-    const data = ffmpeg.FS('readFile', 'output.mp4');
-    ffmpeg.FS('unlink', 'input.webm');
-    ffmpeg.FS('unlink', 'output.mp4');
-    return new Blob([data.buffer], {type:'video/mp4'});
-  }
-
-  // Enregistre le format actuellement sélectionné (state.format) et
-  // retourne {blob, ext} ou null si annulé. Réutilisé par l'export simple
-  // et par l'export en lot.
-  async function recordCurrentFormat(labelPrefix){
-    ensureAudioGraph();
-    if(graphReady && audioCtxRef.state === 'suspended') await audioCtxRef.resume();
-    narrationCaptureWarned = false;
-
-    const canvasStream = canvas.captureStream(30);
-    const audioTracks = graphReady ? destNode.stream.getAudioTracks() : [];
-    if(!graphReady){
-      progressText.textContent = "Capture audio indisponible — la vidéo sera exportée sans son.";
-    }
-    const combined = new MediaStream([...canvasStream.getVideoTracks(), ...audioTracks]);
-    const { mimeType, isMp4 } = pickMimeType();
-    const recorder = new MediaRecorder(combined, {
-      ...(mimeType ? {mimeType} : {}),
-      videoBitsPerSecond: 8_000_000,
-      audioBitsPerSecond: 160_000
-    });
-    const chunks = [];
-    recorder.ondataavailable = (e)=>{ if(e.data && e.data.size) chunks.push(e.data); };
-    const stopped = new Promise(res=>{ recorder.onstop = res; });
-    recorder.start();
-
-    await runThroughVerses((i,v)=>{
-      const label = i === -1 ? 'Basmala' : `${labelPrefix} ${i+1}/${state.verses.length}`;
-      const pct = i === -1 ? 0 : Math.round((i/state.verses.length)*100);
-      progressText.textContent = label;
-      progressPct.textContent = pct + '%';
-      progressFill.style.width = pct + '%';
-    });
-
-    await sleep(400);
-    recorder.stop();
-    await stopped;
-
-    if(state.cancelRequested) return null;
-
-    const rawBlob = new Blob(chunks, {type: mimeType ? mimeType.split(';')[0] : 'video/webm'});
-    if(isMp4) return { blob: rawBlob, ext: 'mp4' };
-
-    try{
-      progressText.textContent = 'Conversion en .mp4…';
-      progressFill.style.width = '0%';
-      const mp4Blob = await convertWebmToMp4(rawBlob, (ratio)=>{
-        const pct = Math.round(ratio*100);
-        progressPct.textContent = pct + '%';
-        progressFill.style.width = pct + '%';
-        progressText.textContent = `Conversion en .mp4… ${pct}%`;
-      });
-      return { blob: mp4Blob, ext: 'mp4' };
-    }catch(convErr){
-      console.error('Conversion mp4 échouée, on garde le .webm', convErr);
-      return { blob: rawBlob, ext: 'webm' };
-    }
-  }
-
-  function filenameBase(){
-    if(state.contentType === 'quran'){
-      const s = state.surahs.find(x=>x.number == state.selectedSurah);
-      return `quran-studio-${s ? s.englishName.toLowerCase() : 'sourate'}-${state.fromAyah}-${state.toAyah}`;
-    } else if(state.contentType === 'hadith'){
-      return `quran-studio-hadith-${state.hadithBook || 'x'}-${state.hadithFrom}-${state.hadithTo}`;
-    }
-    return `quran-studio-adhkar-${state.adhkarCategory}-${state.adhkarFrom}-${state.adhkarTo}`;
-  }
-
-  function currentFilename(ext, formatLabel){
-    const base = filenameBase();
-    return formatLabel ? `${base}-${formatLabel}.${ext}` : `${base}.${ext}`;
-  }
-
-  let lastExportedBlob = null;
 
   generateBtn.addEventListener('click', async ()=>{
     if(state.verses.length === 0 || state.isRecording) return;
+    ensureAudioGraph();
+    if(audioCtxRef.state === 'suspended') await audioCtxRef.resume();
+
     state.isRecording = true;
-    generateBtn.disabled = true; previewBtn.disabled = true; batchExportBtn.disabled = true;
+    generateBtn.disabled = true; previewBtn.disabled = true;
     recIndicator.classList.add('on');
     resultBox.classList.remove('show');
     progressWrap.style.display = 'block';
-    cancelBtn.style.display = 'block';
 
     try{
-      const result = await recordCurrentFormat('Enregistrement — verset');
-      if(!result){
-        progressText.textContent = 'Export annulé';
-      } else {
-        progressFill.style.width = '100%';
-        progressPct.textContent = '100%';
-        progressText.textContent = `Export terminé (.${result.ext})`;
-        lastExportedBlob = result.blob;
-        const url = URL.createObjectURL(result.blob);
-        resultVideo.src = url;
-        downloadLink.href = url;
-        downloadLink.download = currentFilename(result.ext);
-        downloadLink.textContent = `⬇ Télécharger la vidéo (.${result.ext})`;
-        shareBtn.style.display = (navigator.canShare && navigator.share) ? 'block' : 'none';
-        resultBox.classList.add('show');
-        downloadHashtagsFile(filenameBase());
-      }
+      const canvasStream = canvas.captureStream(30);
+      const combined = new MediaStream([
+        ...canvasStream.getVideoTracks(),
+        ...destNode.stream.getAudioTracks()
+      ]);
+      const mimeType = pickMimeType();
+      const recorder = new MediaRecorder(combined, mimeType ? {mimeType} : undefined);
+      const chunks = [];
+      recorder.ondataavailable = (e)=>{ if(e.data && e.data.size) chunks.push(e.data); };
+      const stopped = new Promise(res=>{ recorder.onstop = res; });
+      recorder.start();
+
+      await runThroughVerses((i,v)=>{
+        const pct = Math.round((i/state.verses.length)*100);
+        progressText.textContent = `Enregistrement — verset ${i+1}/${state.verses.length}`;
+        progressPct.textContent = pct + '%';
+        progressFill.style.width = pct + '%';
+      });
+
+      await sleep(400);
+      recorder.stop();
+      await stopped;
+
+      progressFill.style.width = '100%';
+      progressPct.textContent = '100%';
+      progressText.textContent = 'Export terminé';
+
+      const blob = new Blob(chunks, {type: mimeType ? mimeType.split(';')[0] : 'video/webm'});
+      const url = URL.createObjectURL(blob);
+      resultVideo.src = url;
+      downloadLink.href = url;
+      const s = state.surahs.find(x=>x.number == state.selectedSurah);
+      downloadLink.download = `quran-studio-${s ? s.englishName.toLowerCase() : 'sourate'}-${state.fromAyah}-${state.toAyah}.webm`;
+      resultBox.classList.add('show');
     }catch(e){
       console.error(e);
       progressText.textContent = "Erreur pendant l'export — réessayez.";
     } finally {
       state.isRecording = false;
-      generateBtn.disabled = false; previewBtn.disabled = false; batchExportBtn.disabled = false;
+      generateBtn.disabled = false; previewBtn.disabled = false;
       recIndicator.classList.remove('on');
-      cancelBtn.style.display = 'none';
-      setTimeout(()=>{ progressWrap.style.display = 'none'; }, 1500);
-    }
-  });
-
-  shareBtn.addEventListener('click', async ()=>{
-    if(!lastExportedBlob) return;
-    try{
-      const ext = lastExportedBlob.type.includes('mp4') ? 'mp4' : 'webm';
-      const file = new File([lastExportedBlob], currentFilename(ext), {type: lastExportedBlob.type});
-      if(navigator.canShare && navigator.canShare({files:[file]})){
-        await navigator.share({ files:[file], title:'Quran Studio' });
-      } else {
-        alert("Le partage direct n'est pas disponible sur cet appareil — utilisez le bouton de téléchargement.");
-      }
-    }catch(e){
-      if(e.name !== 'AbortError') console.error(e);
-    }
-  });
-
-  hashtagsBtn.addEventListener('click', ()=> downloadHashtagsFile(filenameBase()));
-
-  // ---------------------------------------------------------------
-  // BATCH EXPORT — all 4 platform formats, one after another
-  // ---------------------------------------------------------------
-  batchExportBtn.addEventListener('click', async ()=>{
-    if(state.verses.length === 0 || state.isRecording) return;
-    const formats = ['9:16', '16:9', '1:1', '4:5'];
-    const originalFormat = state.format;
-    const originalActiveBtn = document.querySelector('#formatSeg button.active');
-
-    state.isRecording = true;
-    generateBtn.disabled = true; previewBtn.disabled = true; batchExportBtn.disabled = true;
-    recIndicator.classList.add('on');
-    batchResultBox.classList.remove('show');
-    batchLinks.innerHTML = '';
-    progressWrap.style.display = 'block';
-    cancelBtn.style.display = 'block';
-
-    try{
-      for(let f=0; f<formats.length; f++){
-        if(state.cancelRequested) break;
-        state.format = formats[f];
-        resizeCanvas();
-        progressText.textContent = `Format ${formats[f]} (${f+1}/${formats.length})…`;
-        await sleep(150); // laisse le canvas se redimensionner avant d'enregistrer
-        const result = await recordCurrentFormat(`${formats[f]} — verset`);
-        if(!result || state.cancelRequested) break;
-        const filename = currentFilename(result.ext, formats[f].replace(':','x'));
-        const url = URL.createObjectURL(result.blob);
-        const row = document.createElement('div');
-        row.className = 'dl-row';
-        row.innerHTML = `<a href="${url}" download="${filename}">⬇ ${formats[f]} (.${result.ext})</a>`;
-        batchLinks.appendChild(row);
-      }
-      batchResultBox.classList.add('show');
-      if(!state.cancelRequested){
-        downloadHashtagsFile(filenameBase());
-        const row = document.createElement('div');
-        row.className = 'dl-row';
-        row.innerHTML = `<a href="#" id="batchHashtagsLink">#️⃣ Re-télécharger les hashtags (.txt)</a>`;
-        batchLinks.appendChild(row);
-        document.getElementById('batchHashtagsLink').addEventListener('click', (e)=>{
-          e.preventDefault();
-          downloadHashtagsFile(filenameBase());
-        });
-      }
-      progressText.textContent = state.cancelRequested ? 'Export en lot annulé' : 'Export en lot terminé';
-    }catch(e){
-      console.error(e);
-      progressText.textContent = "Erreur pendant l'export en lot.";
-    } finally {
-      state.format = originalFormat;
-      resizeCanvas();
-      state.isRecording = false;
-      generateBtn.disabled = false; previewBtn.disabled = false; batchExportBtn.disabled = false;
-      recIndicator.classList.remove('on');
-      cancelBtn.style.display = 'none';
       setTimeout(()=>{ progressWrap.style.display = 'none'; }, 1500);
     }
   });
@@ -2678,196 +1018,9 @@
   surahSelect.addEventListener('change', onSurahChange);
   fromAyahInput.addEventListener('input', debounceLoadVerses);
   toAyahInput.addEventListener('input', debounceLoadVerses);
-    translationSelect.addEventListener('change', ()=>{ state.translation = translationSelect.value; loadVerses(); });
+  reciterSelect.addEventListener('change', ()=>{ state.reciter = reciterSelect.value; });
+  translationSelect.addEventListener('change', ()=>{ state.translation = translationSelect.value; loadVerses(); });
   showTranslationChk.addEventListener('change', ()=>{ state.showTranslation = showTranslationChk.checked; });
-
-  const arabicFontSelect = el('arabicFontSelect');
-  const translationFontSelect = el('translationFontSelect');
-  const arabicColorInput = el('arabicColorInput');
-  const translationColorInput = el('translationColorInput');
-  const accentColorInput = el('accentColorInput');
-  const arabicScaleInput = el('arabicScaleInput');
-  const arabicScaleValue = el('arabicScaleValue');
-  const translationScaleInput = el('translationScaleInput');
-  const translationScaleValue = el('translationScaleValue');
-
-  arabicFontSelect.addEventListener('change', ()=>{ state.arabicFont = arabicFontSelect.value; });
-  translationFontSelect.addEventListener('change', ()=>{ state.translationFont = translationFontSelect.value; });
-  arabicColorInput.addEventListener('input', ()=>{ state.arabicColor = arabicColorInput.value; });
-  translationColorInput.addEventListener('input', ()=>{ state.translationColor = translationColorInput.value; });
-  accentColorInput.addEventListener('input', ()=>{ state.accentColor = accentColorInput.value; });
-  arabicScaleInput.addEventListener('input', ()=>{
-    state.arabicTextScale = parseFloat(arabicScaleInput.value);
-    arabicScaleValue.textContent = Math.round(state.arabicTextScale * 100) + '%';
-  });
-  translationScaleInput.addEventListener('input', ()=>{
-    state.translationTextScale = parseFloat(translationScaleInput.value);
-    translationScaleValue.textContent = Math.round(state.translationTextScale * 100) + '%';
-  });
-
-  const verseGapInput = el('verseGapInput');
-  const verseGapValue = el('verseGapValue');
-  verseGapInput.addEventListener('input', ()=>{
-    state.verseGap = parseFloat(verseGapInput.value);
-    verseGapValue.textContent = Math.round(state.verseGap * 100) + '%';
-  });
-
-  const watermarkInput = el('watermarkInput');
-  watermarkInput.addEventListener('input', ()=>{
-    state.watermarkText = watermarkInput.value.trim();
-  });
-
-  translationSelect2.addEventListener('change', ()=>{ state.translation2 = translationSelect2.value; loadVerses(); });
-  showSecondTranslationChk.addEventListener('change', ()=>{
-    state.showSecondTranslation = showSecondTranslationChk.checked;
-    secondTranslationField.style.display = state.showSecondTranslation ? 'block' : 'none';
-    loadVerses();
-  });
-
-  basmalaChk.addEventListener('change', ()=>{ state.basmala = basmalaChk.checked; updateSizeEstimate(); });
-
-  speedInput.addEventListener('input', ()=>{
-    state.speed = parseFloat(speedInput.value);
-    speedValue.textContent = state.speed.toFixed(2) + 'x';
-    audioPlayer.playbackRate = state.speed;
-    updateSizeEstimate();
-  });
-
-  tajweedChk.addEventListener('change', ()=>{ state.tajweed = tajweedChk.checked; loadVerses(); });
-  karaokeChk.addEventListener('change', ()=>{ state.karaoke = karaokeChk.checked; });
-
-  textPosSeg.addEventListener('click', (e)=>{
-    const btn = e.target.closest('button'); if(!btn) return;
-    [...textPosSeg.children].forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    state.textPosition = btn.dataset.pos;
-  });
-
-  // ---------------------------------------------------------------
-  // READY-MADE THEMES
-  // ---------------------------------------------------------------
-  function renderThemeGrid(){
-    themeGrid.innerHTML = THEMES.map((t, i) => `
-      <div class="theme-card" data-index="${i}">
-        <div class="swatch" style="background:${t.swatch}"></div>
-        <span>${t.name}</span>
-      </div>
-    `).join('');
-  }
-  renderThemeGrid();
-
-  themeGrid.addEventListener('click', (e)=>{
-    const card = e.target.closest('.theme-card'); if(!card) return;
-    const theme = THEMES[parseInt(card.dataset.index, 10)];
-    if(!theme) return;
-    state.arabicFont = theme.arabicFont;
-    state.translationFont = theme.translationFont;
-    state.arabicColor = theme.arabicColor;
-    state.translationColor = theme.translationColor;
-    state.accentColor = theme.accentColor;
-    arabicFontSelect.value = theme.arabicFont;
-    translationFontSelect.value = theme.translationFont;
-    arabicColorInput.value = theme.arabicColor;
-    translationColorInput.value = theme.translationColor;
-    accentColorInput.value = theme.accentColor;
-    setActiveMode(theme.bgMode);
-    [...libGrid.children].forEach(c=>c.classList.remove('active'));
-    state.activePresetUrl = null;
-  });
-
-  // ---------------------------------------------------------------
-  // MY STYLE PRESETS (saved in localStorage)
-  // ---------------------------------------------------------------
-  const PRESET_KEY = 'quranStudioPresets';
-  function loadPresets(){
-    try{ return JSON.parse(localStorage.getItem(PRESET_KEY) || '[]'); }
-    catch(e){ return []; }
-  }
-  function savePresets(list){
-    try{ localStorage.setItem(PRESET_KEY, JSON.stringify(list)); }catch(e){ console.error(e); }
-  }
-  function currentStyleSnapshot(){
-    return {
-      arabicFont: state.arabicFont, translationFont: state.translationFont,
-      arabicColor: state.arabicColor, translationColor: state.translationColor,
-      accentColor: state.accentColor, arabicTextScale: state.arabicTextScale,
-      translationTextScale: state.translationTextScale, verseGap: state.verseGap,
-      textPosition: state.textPosition, bgMode: state.bgMode
-    };
-  }
-  function applyStyleSnapshot(snap){
-    Object.assign(state, snap);
-    arabicFontSelect.value = snap.arabicFont;
-    translationFontSelect.value = snap.translationFont;
-    arabicColorInput.value = snap.arabicColor;
-    translationColorInput.value = snap.translationColor;
-    accentColorInput.value = snap.accentColor;
-    arabicScaleInput.value = snap.arabicTextScale;
-    arabicScaleValue.textContent = Math.round(snap.arabicTextScale*100)+'%';
-    translationScaleInput.value = snap.translationTextScale;
-    translationScaleValue.textContent = Math.round(snap.translationTextScale*100)+'%';
-    verseGapInput.value = snap.verseGap;
-    verseGapValue.textContent = Math.round(snap.verseGap*100)+'%';
-    [...textPosSeg.children].forEach(b=>b.classList.toggle('active', b.dataset.pos===snap.textPosition));
-    if(snap.bgMode) setActiveMode(snap.bgMode);
-  }
-  function renderPresetList(){
-    const list = loadPresets();
-    if(list.length === 0){ presetList.innerHTML = '<div class="hint">Aucun style enregistré pour l\'instant.</div>'; return; }
-    presetList.innerHTML = list.map((p, i) => `
-      <div class="preset-item" data-index="${i}">
-        <span>${p.name}</span>
-        <span class="del" data-del="${i}">✕</span>
-      </div>
-    `).join('');
-  }
-  savePresetBtn.addEventListener('click', ()=>{
-    const name = prompt('Nom de ce style ?', `Style ${loadPresets().length + 1}`);
-    if(!name) return;
-    const list = loadPresets();
-    list.push({ name, style: currentStyleSnapshot() });
-    savePresets(list);
-    renderPresetList();
-  });
-  const DEFAULT_STYLE = {
-    arabicFont:'Amiri', translationFont:'Manrope', arabicColor:'#f5f1e6', translationColor:'#cfe3dc',
-    accentColor:'#c9a24b', arabicTextScale:1, translationTextScale:1, verseGap:1,
-    textPosition:'center', bgMode:'gradient'
-  };
-  resetPresetBtn.addEventListener('click', ()=>{
-    applyStyleSnapshot(DEFAULT_STYLE);
-  });
-  presetList.addEventListener('click', (e)=>{
-    const del = e.target.closest('[data-del]');
-    if(del){
-      const idx = parseInt(del.dataset.del, 10);
-      const list = loadPresets();
-      list.splice(idx, 1);
-      savePresets(list);
-      renderPresetList();
-      return;
-    }
-    const item = e.target.closest('.preset-item');
-    if(!item) return;
-    const list = loadPresets();
-    const preset = list[parseInt(item.dataset.index, 10)];
-    if(preset) applyStyleSnapshot(preset.style);
-  });
-  renderPresetList();
-
-  // ---------------------------------------------------------------
-  // FILE SIZE ESTIMATE
-  // ---------------------------------------------------------------
-  function updateSizeEstimate(){
-    if(!state.verses.length){ sizeEstimate.textContent = ''; return; }
-    const perAyahMs = state.verses.map(v => estimateDurationMs(v.arabic) / state.speed);
-    let totalMs = perAyahMs.reduce((a,b)=>a+b, 0);
-    if(state.basmala) totalMs += 2500;
-    const totalSec = totalMs / 1000;
-    const totalBits = (8_000_000 + 160_000) * totalSec; // matches export bitrate
-    const totalMB = totalBits / 8 / 1024 / 1024;
-    sizeEstimate.textContent = `Durée estimée : ~${Math.round(totalSec)}s · Taille estimée : ~${totalMB.toFixed(1)} Mo`;
-  }
 
   // ---------------------------------------------------------------
   // INIT
