@@ -495,6 +495,11 @@
       </label>
 
       <label class="field">
+        <span class="lbl">Filigrane (discret, coin bas-gauche)</span>
+        <input type="text" id="watermarkInput" value="Younus Islam" placeholder="Nom de votre compte…" maxlength="40">
+      </label>
+
+      <label class="field">
         <span class="lbl">Position du texte</span>
         <div class="seg" id="textPosSeg">
           <button data-pos="top">Haut</button>
@@ -598,7 +603,10 @@
         <a id="downloadLink" download="quran-studio.webm">⬇ Télécharger la vidéo (.webm)</a>
         <button class="secondary" id="shareBtn" style="display:none;">📤 Partager</button>
       </div>
-      <div class="hint">Compatible montage / partage direct. Pour Instagram ou TikTok sur mobile, si le format .webm n'est pas accepté, convertissez-le rapidement en .mp4 avec un outil gratuit (CloudConvert, VLC…).</div>
+      <div class="dl-row">
+        <button class="secondary" id="hashtagsBtn" style="width:100%;">#️⃣ Télécharger les hashtags (.txt)</button>
+      </div>
+      <div class="hint">Compatible montage / partage direct. Pour Instagram ou TikTok sur mobile, si le format .webm n'est pas accepté, convertissez-le rapidement en .mp4 avec un outil gratuit (CloudConvert, VLC…). Un fichier de hashtags a été téléchargé automatiquement avec votre vidéo.</div>
     </div>
 
     <div class="result" id="batchResult">
@@ -674,8 +682,9 @@
   const RECITER_CANDIDATES = [
     { id:'ar.alafasy', name:'Mishary Rashid Alafasy', tags:['populaire','voix-douce','rythme-moyen'] },
     { id:'ar.abdulbasitmurattal', name:'Abdul Basit (Murattal)', tags:['classique','voix-puissante','rythme-lent'] },
+    { id:'ar.abdulsamad', name:'Abdul Basit (Mujawwad)', tags:['classique','voix-puissante','rythme-lent'] },
     { id:'ar.abdurrahmaansudais', name:'Abdur-Rahman As-Sudais', tags:['populaire','voix-puissante','rythme-moyen'] },
-    { id:'ar.saoodshuraym', name:'Saud Al-Shuraim', tags:['voix-puissante','rythme-moyen'] },
+    { id:'ar.saoodshuraym', name:'Saud Al-Shuraim', tags:['populaire','voix-puissante','rythme-moyen'] },
     { id:'ar.husary', name:'Mahmoud Khalil Al-Husary', tags:['classique','rythme-lent'] },
     { id:'ar.husarymujawwad', name:'Al-Husary (Mujawwad)', tags:['classique','rythme-lent'] },
     { id:'ar.minshawi', name:'Mohamed Al-Minshawi (Murattal)', tags:['voix-douce','rythme-moyen'] },
@@ -688,6 +697,16 @@
     { id:'ar.muhammadayyoub', name:'Muhammad Ayyoub', tags:['rythme-moyen'] },
     { id:'ar.muhammadjibreel', name:'Muhammad Jibreel', tags:['rythme-moyen'] },
     { id:'ar.parhizgar', name:'Shahriar Parhizgar', tags:['voix-douce','rythme-lent'] },
+    { id:'ar.yasseraldossari', name:'Yasser Al-Dossari', tags:['populaire','voix-douce','rythme-lent'] },
+    { id:'ar.muhammadalluhaidan', name:'Muhammad Al-Luhaidan', tags:['populaire','voix-douce','rythme-lent'] },
+    { id:'ar.idrisabkar', name:'Idris Abkar', tags:['voix-douce','rythme-lent'] },
+    { id:'ar.nasseralqatami', name:'Nasser Al-Qatami', tags:['populaire','voix-douce','rythme-moyen'] },
+    { id:'ar.faresabbad', name:'Fares Abbad', tags:['voix-douce','rythme-lent'] },
+    { id:'ar.bandarbaleela', name:'Bandar Baleela', tags:['voix-puissante','rythme-moyen'] },
+    { id:'ar.abdullahbasfar', name:'Abdullah Basfar', tags:['classique','rythme-moyen'] },
+    { id:'ar.salahbukhatir', name:'Salah Bukhatir', tags:['voix-douce','rythme-moyen'] },
+    { id:'ar.alihajjajalsuwaidan', name:'Ali Al-Hajjaj', tags:['voix-douce','rythme-moyen'] },
+    { id:'ar.wadeeyamani', name:'Wadee Al-Yamani', tags:['voix-douce','rythme-lent'] },
   ];
 
   const RECITER_TAGS = [
@@ -721,6 +740,84 @@
     PostPrayer_azkar: { label:'Adhkar après la prière', url:'https://ahegazy.github.io/muslimKit/json/PostPrayer_azkar.json' },
   };
   const adhkarCache = new Map();
+
+  // ---------------------------------------------------------------
+  // VIRAL HASHTAGS — combined per export into a downloadable .txt
+  // ---------------------------------------------------------------
+  const HASHTAGS_GENERAL = [
+    '#Quran', '#Coran', '#Islam', '#IslamicReminder', '#Muslim', '#Dawah',
+    '#Deen', '#Ummah', '#Faith', '#Spirituality', '#IslamicQuotes',
+    '#QuranicVerses', '#Reminder', '#IslamicVideo', '#MuslimTikTok',
+  ];
+  const HASHTAGS_PLATFORM = [
+    '#shorts', '#reels', '#fyp', '#foryoupage', '#viral', '#explore',
+    '#trending', '#reelsinstagram', '#tiktokislam', '#youtubeshorts',
+  ];
+  const HASHTAGS_QURAN = [
+    '#QuranRecitation', '#Tilawah', '#QuranDaily', '#Ayah', '#HifzQuran',
+    '#QuranTime', '#BeautifulQuran', '#QuranVerses',
+  ];
+  const HASHTAGS_HADITH = [
+    '#Hadith', '#Sunnah', '#ProphetMuhammad', '#HadithOfTheDay',
+    '#SahihBukhari', '#IslamicKnowledge',
+  ];
+  const HASHTAGS_ADHKAR = [
+    '#Adhkar', '#Dhikr', '#Dua', '#DuaOfTheDay', '#Remembrance', '#Prayer',
+  ];
+
+  function slugifyTag(text){
+    return '#' + text
+      .normalize('NFKD').replace(/[\u0300-\u036f]/g, '') // strip accents
+      .replace(/[^a-zA-Z0-9]+/g, '')
+      .replace(/^./, c => c.toUpperCase());
+  }
+
+  function pickRandom(arr, n){
+    const copy = [...arr];
+    const out = [];
+    while(copy.length && out.length < n){
+      out.push(copy.splice(Math.floor(Math.random()*copy.length), 1)[0]);
+    }
+    return out;
+  }
+
+  function generateHashtags(){
+    const tags = new Set();
+    HASHTAGS_GENERAL.forEach(t => tags.add(t));
+    pickRandom(HASHTAGS_PLATFORM, 5).forEach(t => tags.add(t));
+
+    if(state.contentType === 'quran'){
+      HASHTAGS_QURAN.forEach(t => tags.add(t));
+      const s = state.surahs.find(x=>x.number == state.selectedSurah);
+      if(s) tags.add(slugifyTag('Surah' + s.englishName));
+      const reciter = (state.reciters || []).find(r=>r.id===state.reciter);
+      if(reciter) tags.add(slugifyTag(reciter.name));
+    } else if(state.contentType === 'hadith'){
+      HASHTAGS_HADITH.forEach(t => tags.add(t));
+      const book = HADITH_BOOKS.find(b=>b.key===state.hadithBook);
+      if(book) tags.add(slugifyTag(book.label));
+    } else if(state.contentType === 'adhkar'){
+      HASHTAGS_ADHKAR.forEach(t => tags.add(t));
+      const cat = ADHKAR_CATEGORIES[state.adhkarCategory];
+      if(cat) tags.add(slugifyTag(cat.label));
+    }
+    return [...tags];
+  }
+
+  function downloadHashtagsFile(filenameBase){
+    const tags = generateHashtags();
+    const content = tags.join(' ') + '\n\n— une par ligne —\n\n' + tags.join('\n');
+    const blob = new Blob([content], {type:'text/plain;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${filenameBase}-hashtags.txt`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=> URL.revokeObjectURL(url), 4000);
+  }
+
 
   // Thèmes prêts à l'emploi : combinaisons police + couleurs + fond
   const THEMES = [
@@ -785,6 +882,7 @@
     arabicColor: '#f5f1e6',
     translationColor: '#cfe3dc',
     accentColor: '#c9a24b',
+    watermarkText: 'Younus Islam',
     arabicTextScale: 1,
     translationTextScale: 1,
     verseGap: 1,
@@ -851,6 +949,7 @@
   const resultVideo = el('resultVideo');
   const downloadLink = el('downloadLink');
   const shareBtn = el('shareBtn');
+  const hashtagsBtn = el('hashtagsBtn');
   const batchResultBox = el('batchResult');
   const batchLinks = el('batchLinks');
   const sizeEstimate = el('sizeEstimate');
@@ -1921,11 +2020,13 @@
       drawBasmalaFrame(t, w, h, cx);
       drawStar(w*0.09, h*0.065, w*0.045, t/9000, state.accentColor, 0.85, 2);
       drawStar(w*0.91, h*0.065, w*0.045, -t/9000, state.accentColor, 0.85, 2);
-      ctx.font = `700 ${Math.round(w*0.024)}px "${state.translationFont}"`;
-      ctx.fillStyle = 'rgba(245,241,230,0.55)';
-      ctx.textAlign = 'left';
-      ctx.fillText('Quran Studio', w*0.055, h*0.965);
-      ctx.textAlign = 'center';
+      if(state.watermarkText){
+        ctx.font = `600 ${Math.round(w*0.022)}px "${state.translationFont}"`;
+        ctx.fillStyle = 'rgba(245,241,230,0.32)';
+        ctx.textAlign = 'left';
+        ctx.fillText(state.watermarkText, w*0.055, h*0.965);
+        ctx.textAlign = 'center';
+      }
       return;
     }
 
@@ -2037,12 +2138,14 @@
     drawStar(w*0.09, h*0.065, w*0.045, t/9000, state.accentColor, 0.85, 2);
     drawStar(w*0.91, h*0.065, w*0.045, -t/9000, state.accentColor, 0.85, 2);
 
-    // brand watermark
-    ctx.font = `700 ${Math.round(w*0.024)}px "${state.translationFont}"`;
-    ctx.fillStyle = 'rgba(245,241,230,0.55)';
-    ctx.textAlign = 'left';
-    ctx.fillText('Quran Studio', w*0.055, h*0.965);
-    ctx.textAlign = 'center';
+    // brand watermark — kept subtle on purpose ("pas trop visible")
+    if(state.watermarkText){
+      ctx.font = `600 ${Math.round(w*0.022)}px "${state.translationFont}"`;
+      ctx.fillStyle = 'rgba(245,241,230,0.32)';
+      ctx.textAlign = 'left';
+      ctx.fillText(state.watermarkText, w*0.055, h*0.965);
+      ctx.textAlign = 'center';
+    }
   }
 
   // ---------------------------------------------------------------
@@ -2436,16 +2539,18 @@
     }
   }
 
-  function currentFilename(ext, formatLabel){
-    let base;
+  function filenameBase(){
     if(state.contentType === 'quran'){
       const s = state.surahs.find(x=>x.number == state.selectedSurah);
-      base = `quran-studio-${s ? s.englishName.toLowerCase() : 'sourate'}-${state.fromAyah}-${state.toAyah}`;
+      return `quran-studio-${s ? s.englishName.toLowerCase() : 'sourate'}-${state.fromAyah}-${state.toAyah}`;
     } else if(state.contentType === 'hadith'){
-      base = `quran-studio-hadith-${state.hadithBook || 'x'}-${state.hadithFrom}-${state.hadithTo}`;
-    } else {
-      base = `quran-studio-adhkar-${state.adhkarCategory}-${state.adhkarFrom}-${state.adhkarTo}`;
+      return `quran-studio-hadith-${state.hadithBook || 'x'}-${state.hadithFrom}-${state.hadithTo}`;
     }
+    return `quran-studio-adhkar-${state.adhkarCategory}-${state.adhkarFrom}-${state.adhkarTo}`;
+  }
+
+  function currentFilename(ext, formatLabel){
+    const base = filenameBase();
     return formatLabel ? `${base}-${formatLabel}.${ext}` : `${base}.${ext}`;
   }
 
@@ -2476,6 +2581,7 @@
         downloadLink.textContent = `⬇ Télécharger la vidéo (.${result.ext})`;
         shareBtn.style.display = (navigator.canShare && navigator.share) ? 'block' : 'none';
         resultBox.classList.add('show');
+        downloadHashtagsFile(filenameBase());
       }
     }catch(e){
       console.error(e);
@@ -2503,6 +2609,8 @@
       if(e.name !== 'AbortError') console.error(e);
     }
   });
+
+  hashtagsBtn.addEventListener('click', ()=> downloadHashtagsFile(filenameBase()));
 
   // ---------------------------------------------------------------
   // BATCH EXPORT — all 4 platform formats, one after another
@@ -2538,6 +2646,17 @@
         batchLinks.appendChild(row);
       }
       batchResultBox.classList.add('show');
+      if(!state.cancelRequested){
+        downloadHashtagsFile(filenameBase());
+        const row = document.createElement('div');
+        row.className = 'dl-row';
+        row.innerHTML = `<a href="#" id="batchHashtagsLink">#️⃣ Re-télécharger les hashtags (.txt)</a>`;
+        batchLinks.appendChild(row);
+        document.getElementById('batchHashtagsLink').addEventListener('click', (e)=>{
+          e.preventDefault();
+          downloadHashtagsFile(filenameBase());
+        });
+      }
       progressText.textContent = state.cancelRequested ? 'Export en lot annulé' : 'Export en lot terminé';
     }catch(e){
       console.error(e);
@@ -2591,6 +2710,11 @@
   verseGapInput.addEventListener('input', ()=>{
     state.verseGap = parseFloat(verseGapInput.value);
     verseGapValue.textContent = Math.round(state.verseGap * 100) + '%';
+  });
+
+  const watermarkInput = el('watermarkInput');
+  watermarkInput.addEventListener('input', ()=>{
+    state.watermarkText = watermarkInput.value.trim();
   });
 
   translationSelect2.addEventListener('change', ()=>{ state.translation2 = translationSelect2.value; loadVerses(); });
