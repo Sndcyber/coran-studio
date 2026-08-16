@@ -2112,7 +2112,7 @@
   // Returns an AudioBuffer on success, or null if unreachable / no CORS.
   async function fetchNarrationBuffer(url){
     try{
-      const res = await fetch(url, { mode:'cors' });
+      const res = await fetch(url, { mode:'cors', cache:'no-store' });
       if(!res.ok) return null;
       const arrayBuffer = await res.arrayBuffer();
       return await audioCtxRef.decodeAudioData(arrayBuffer);
@@ -2226,15 +2226,18 @@
     }
     const url = audioUrlFor(globalNumber);
 
-    // best-effort: feed the capture graph in parallel while recording
+    // Capture pour l'export : lancée en parallèle, JAMAIS attendue avant la
+    // lecture audible/native ci-dessous — un réseau lent sur cette requête
+    // ne doit jamais retarder ou décaler le rythme réel de la vidéo.
     if(state.isRecording && graphReady){
-      const buffer = await fetchNarrationBuffer(url);
-      if(buffer){
-        playNarrationBuffer(buffer);
-      } else if(!narrationCaptureWarned){
-        narrationCaptureWarned = true;
-        progressText.textContent = "Capture audio indisponible (CORS du serveur audio) — la vidéo sera exportée sans narration.";
-      }
+      fetchNarrationBuffer(url).then(buffer => {
+        if(buffer){
+          playNarrationBuffer(buffer);
+        } else if(!narrationCaptureWarned){
+          narrationCaptureWarned = true;
+          progressText.textContent = "Capture audio indisponible (CORS du serveur audio) — la vidéo sera exportée sans narration.";
+        }
+      });
     }
 
     audioPlayer.playbackRate = state.speed;
