@@ -312,6 +312,15 @@
     </div>
 
     <div class="group">
+      <div class="group-title"><span class="dash"></span>Type de contenu</div>
+      <div class="seg" id="contentTypeSeg">
+        <button data-type="quran" class="active">Coran</button>
+        <button data-type="hadith">Hadith</button>
+        <button data-type="adhkar">Adhkar</button>
+      </div>
+    </div>
+
+    <div class="group" id="quranSourceGroup">
       <div class="group-title"><span class="dash"></span>Source du verset</div>
       <label class="field">
         <span class="lbl">Rechercher un mot ou une expression</span>
@@ -337,7 +346,54 @@
       <label class="checkline"><input type="checkbox" id="basmalaChk"> Afficher la Basmala avant le premier verset</label>
     </div>
 
-    <div class="group">
+    <div class="group" id="hadithSourceGroup" style="display:none;">
+      <div class="group-title"><span class="dash"></span>Source du hadith</div>
+      <label class="field">
+        <span class="lbl">Recueil</span>
+        <select id="hadithBookSelect"><option>Chargement…</option></select>
+      </label>
+      <label class="field">
+        <span class="lbl">Traduction</span>
+        <select id="hadithLangSelect"><option>Chargement…</option></select>
+      </label>
+      <div class="row2">
+        <label class="field">
+          <span class="lbl">Du n°</span>
+          <input type="number" id="hadithFrom" min="1" value="1">
+        </label>
+        <label class="field">
+          <span class="lbl">Au n°</span>
+          <input type="number" id="hadithTo" min="1" value="1">
+        </label>
+      </div>
+      <button class="secondary" id="hadithRandomBtn" style="width:100%; margin-top:4px;">🎲 Hadith aléatoire</button>
+      <div class="hint" id="hadithHint" style="margin-top:8px;"></div>
+    </div>
+
+    <div class="group" id="adhkarSourceGroup" style="display:none;">
+      <div class="group-title"><span class="dash"></span>Source des adhkar</div>
+      <label class="field">
+        <span class="lbl">Catégorie</span>
+        <select id="adhkarCategorySelect">
+          <option value="azkar_sabah">Adhkar du matin</option>
+          <option value="azkar_massa">Adhkar du soir</option>
+          <option value="PostPrayer_azkar">Adhkar après la prière</option>
+        </select>
+      </label>
+      <div class="row2">
+        <label class="field">
+          <span class="lbl">Du n°</span>
+          <input type="number" id="adhkarFrom" min="1" value="1">
+        </label>
+        <label class="field">
+          <span class="lbl">Au n°</span>
+          <input type="number" id="adhkarTo" min="1" value="3">
+        </label>
+      </div>
+      <div class="hint" id="adhkarHint" style="margin-top:8px;"></div>
+    </div>
+
+    <div class="group" id="reciterGroup">
       <div class="group-title"><span class="dash"></span>Récitateur</div>
       <input type="text" id="reciterSearch" placeholder="Rechercher un récitateur…" style="margin-bottom:9px;">
       <div class="chip-row" id="reciterChips"></div>
@@ -354,6 +410,21 @@
     </div>
 
     <div class="group">
+      <div class="group-title"><span class="dash"></span>Musique de fond (Nasheed)</div>
+      <label class="filebtn" id="nasheedFileBtn">Cliquer pour importer un nasheed (MP3)
+        <input type="file" id="nasheedFile" accept="audio/*">
+      </label>
+      <label class="field" style="margin-top:10px; display:none;" id="nasheedVolumeField">
+        <span class="lbl">Volume du fond sonore</span>
+        <div class="range-row">
+          <input type="range" id="nasheedVolumeInput" min="0" max="1" step="0.05" value="0.35">
+          <span id="nasheedVolumeValue">35%</span>
+        </div>
+      </label>
+      <div class="hint">Importez un nasheed que vous avez le droit d'utiliser. Besoin d'en trouver un libre de droits ? <a href="https://pixabay.com/music/search/nasheed/" target="_blank" rel="noopener" style="color:var(--gold-light);">Parcourir sur Pixabay ↗</a></div>
+    </div>
+
+    <div class="group" id="translationGroup">
       <div class="group-title"><span class="dash"></span>Traduction</div>
       <label class="field">
         <span class="lbl">Langue / édition</span>
@@ -538,7 +609,7 @@
 </main>
 
 <audio id="audioPlayer" style="display:none;"></audio>
-<audio id="audioCapture" crossorigin="anonymous" muted style="display:none;"></audio>
+<audio id="nasheedPlayer" loop style="display:none;"></audio>
 
 <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 <script>
@@ -629,6 +700,28 @@
     { key:'classique', label:'Classique' },
   ];
 
+  // Recueils de hadiths proposés (identifiants "book" de l'API fawazahmed0)
+  // avec un nombre max approximatif utilisé pour le tirage aléatoire.
+  const HADITH_BOOKS = [
+    { key:'bukhari', label:'Sahih al-Bukhari', max:7563 },
+    { key:'muslim', label:'Sahih Muslim', max:7500 },
+    { key:'abudawud', label:'Sunan Abu Dawud', max:5274 },
+    { key:'tirmidhi', label:'Jami at-Tirmidhi', max:3956 },
+    { key:'nasai', label:'Sunan an-Nasai', max:5758 },
+    { key:'ibnmajah', label:'Sunan Ibn Majah', max:4341 },
+    { key:'malik', label:'Muwatta Malik', max:1832 },
+    { key:'riyadussalihin', label:'Riyad as-Salihin', max:1896 },
+    { key:'nawawi40', label:"Les 40 hadiths de An-Nawawi", max:42 },
+    { key:'qudsi40', label:'40 Hadith Qudsi', max:40 },
+  ];
+
+  const ADHKAR_CATEGORIES = {
+    azkar_sabah: { label:'Adhkar du matin', url:'https://ahegazy.github.io/muslimKit/json/azkar_sabah.json' },
+    azkar_massa: { label:'Adhkar du soir', url:'https://ahegazy.github.io/muslimKit/json/azkar_massa.json' },
+    PostPrayer_azkar: { label:'Adhkar après la prière', url:'https://ahegazy.github.io/muslimKit/json/PostPrayer_azkar.json' },
+  };
+  const adhkarCache = new Map();
+
   // Thèmes prêts à l'emploi : combinaisons police + couleurs + fond
   const THEMES = [
     { name:'Classique doré', swatch:'linear-gradient(135deg,#0c2622,#c9a24b)',
@@ -700,6 +793,17 @@
     karaoke: false,
     basmala: false,
     speed: 1,
+    contentType: 'quran',   // 'quran' | 'hadith' | 'adhkar'
+    hadithBooks: [],
+    hadithBook: null,
+    hadithLang: null,
+    hadithFrom: 1,
+    hadithTo: 1,
+    adhkarCategory: 'azkar_sabah',
+    adhkarFrom: 1,
+    adhkarTo: 3,
+    nasheedUrl: null,
+    nasheedVolume: 0.35,
     bgMode: 'gradient',
     imageEl: null,
     videoEl: null,
@@ -763,8 +867,29 @@
   const savePresetBtn = el('savePresetBtn');
   const resetPresetBtn = el('resetPresetBtn');
   const presetList = el('presetList');
+  const contentTypeSeg = el('contentTypeSeg');
+  const quranSourceGroup = el('quranSourceGroup');
+  const hadithSourceGroup = el('hadithSourceGroup');
+  const adhkarSourceGroup = el('adhkarSourceGroup');
+  const reciterGroup = el('reciterGroup');
+  const translationGroup = el('translationGroup');
+  const hadithBookSelect = el('hadithBookSelect');
+  const hadithLangSelect = el('hadithLangSelect');
+  const hadithFromInput = el('hadithFrom');
+  const hadithToInput = el('hadithTo');
+  const hadithRandomBtn = el('hadithRandomBtn');
+  const hadithHint = el('hadithHint');
+  const adhkarCategorySelect = el('adhkarCategorySelect');
+  const adhkarFromInput = el('adhkarFrom');
+  const adhkarToInput = el('adhkarTo');
+  const adhkarHint = el('adhkarHint');
+  const nasheedFileBtn = el('nasheedFileBtn');
+  const nasheedFileInput = el('nasheedFile');
+  const nasheedVolumeField = el('nasheedVolumeField');
+  const nasheedVolumeInput = el('nasheedVolumeInput');
+  const nasheedVolumeValue = el('nasheedVolumeValue');
+  const nasheedPlayer = el('nasheedPlayer');
   const audioPlayer = el('audioPlayer');
-  const audioCapture = el('audioCapture');
   audioPlayer.muted = false;
   audioPlayer.volume = 1.0;
   audioPlayer.preload = 'auto';
@@ -1049,6 +1174,262 @@
   }
 
   // ---------------------------------------------------------------
+  // CONTENT TYPE SWITCHING (Coran / Hadith / Adhkar)
+  // ---------------------------------------------------------------
+  function updateContentTypeUI(){
+    const isQuran = state.contentType === 'quran';
+    const isHadith = state.contentType === 'hadith';
+    const isAdhkar = state.contentType === 'adhkar';
+    quranSourceGroup.style.display = isQuran ? 'block' : 'none';
+    hadithSourceGroup.style.display = isHadith ? 'block' : 'none';
+    adhkarSourceGroup.style.display = isAdhkar ? 'block' : 'none';
+    reciterGroup.style.display = isQuran ? 'block' : 'none';
+    translationGroup.style.display = isQuran ? 'block' : 'none';
+    tajweedChk.closest('label').style.display = isQuran ? 'flex' : 'none';
+    if(!isQuran){ tajweedChk.checked = false; state.tajweed = false; }
+  }
+
+  contentTypeSeg.addEventListener('click', (e)=>{
+    const btn = e.target.closest('button'); if(!btn) return;
+    [...contentTypeSeg.children].forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    state.contentType = btn.dataset.type;
+    state.verses = [];
+    state.currentVerseIndex = 0;
+    updateContentTypeUI();
+    if(state.contentType === 'quran') loadVerses();
+    else if(state.contentType === 'hadith'){
+      if(state.hadithBooks.length === 0) loadHadithBooks(); else loadHadithVerses();
+    } else if(state.contentType === 'adhkar') loadAdhkarVerses();
+  });
+
+  // ---------------------------------------------------------------
+  // HADITH — dynamic editions from fawazahmed0/hadith-api (jsDelivr, no key)
+  // ---------------------------------------------------------------
+  const HADITH_API = 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1';
+  let hadithEditionsRaw = null;
+
+  async function loadHadithBooks(){
+    hadithBookSelect.innerHTML = '<option>Chargement…</option>';
+    hadithHint.textContent = '';
+    try{
+      const res = await fetch(`${HADITH_API}/editions.min.json`);
+      hadithEditionsRaw = await res.json();
+      const available = HADITH_BOOKS.filter(b => hadithEditionsRaw[b.key]);
+      state.hadithBooks = available;
+      hadithBookSelect.innerHTML = available.map(b => `<option value="${b.key}">${b.label}</option>`).join('');
+      state.hadithBook = available[0].key;
+      hadithBookSelect.value = state.hadithBook;
+      populateHadithLangs();
+      loadHadithVerses();
+    }catch(e){
+      hadithBookSelect.innerHTML = '<option value="bukhari">Sahih al-Bukhari</option>';
+      hadithLangSelect.innerHTML = '<option value="eng-bukhari">English</option>';
+      state.hadithBook = 'bukhari';
+      state.hadithLang = 'eng-bukhari';
+      hadithHint.textContent = "Impossible de charger la liste des recueils — réessayez plus tard.";
+      console.error(e);
+    }
+  }
+
+  function populateHadithLangs(){
+    if(!hadithEditionsRaw || !state.hadithBook) return;
+    const collection = hadithEditionsRaw[state.hadithBook]?.collection || [];
+    const translations = collection.filter(c => c.language !== 'Arabic');
+    const preferredLangs = ['French','English','Urdu','Indonesian','Turkish'];
+    translations.sort((a,b)=>{
+      const ia = preferredLangs.indexOf(a.language), ib = preferredLangs.indexOf(b.language);
+      if(ia!==-1 && ib!==-1) return ia-ib;
+      if(ia!==-1) return -1;
+      if(ib!==-1) return 1;
+      return a.language.localeCompare(b.language);
+    });
+    if(translations.length === 0){
+      hadithLangSelect.innerHTML = '<option value="">(traduction indisponible)</option>';
+      state.hadithLang = null;
+      return;
+    }
+    hadithLangSelect.innerHTML = translations.map(t => `<option value="${t.name}">${t.language}</option>`).join('');
+    const fr = translations.find(t=>t.language==='French') || translations[0];
+    hadithLangSelect.value = fr.name;
+    state.hadithLang = fr.name;
+  }
+
+  function hadithArabicEdition(){
+    if(!hadithEditionsRaw || !state.hadithBook) return null;
+    const collection = hadithEditionsRaw[state.hadithBook]?.collection || [];
+    const arabic = collection.find(c => c.language === 'Arabic' && !c.name.endsWith('1'))
+      || collection.find(c => c.language === 'Arabic');
+    return arabic ? arabic.name : null;
+  }
+
+  let hadithLoadToken = 0;
+  async function loadHadithVerses(){
+    const myToken = ++hadithLoadToken;
+    if(!state.hadithBook) return;
+    verseLoading.style.display = 'block';
+    verseLoading.textContent = 'Chargement du hadith…';
+    hadithHint.textContent = '';
+    try{
+      const bookMeta = HADITH_BOOKS.find(b=>b.key===state.hadithBook);
+      const from = clampInt(hadithFromInput.value, 1, bookMeta ? bookMeta.max : 9999);
+      const to = clampInt(hadithToInput.value, from, bookMeta ? bookMeta.max : 9999);
+      state.hadithFrom = from; state.hadithTo = to;
+      const span = Math.min(to - from + 1, 20); // safety cap
+      const araEd = hadithArabicEdition();
+      const transEd = state.hadithLang;
+
+      const numbers = Array.from({length: span}, (_,i) => from + i);
+      const results = await Promise.all(numbers.map(async (num) => {
+        try{
+          const [araRes, transRes] = await Promise.all([
+            araEd ? fetch(`${HADITH_API}/editions/${araEd}/${num}.min.json`) : null,
+            transEd ? fetch(`${HADITH_API}/editions/${transEd}/${num}.min.json`) : null,
+          ]);
+          const araJson = araRes && araRes.ok ? await araRes.json() : null;
+          const transJson = transRes && transRes.ok ? await transRes.json() : null;
+          const araText = araJson?.hadiths?.[0]?.text;
+          const transText = transJson?.hadiths?.[0]?.text;
+          if(!araText && !transText) return null;
+          const label = bookMeta ? bookMeta.label : state.hadithBook;
+          return {
+            arabic: araText || transText,
+            translation: araText ? (transText || '') : '',
+            translation2: '',
+            badge: `${label} · #${num}`,
+            globalNumber: null,
+            tajweedSegments: null,
+          };
+        }catch(e){ return null; }
+      }));
+      if(myToken !== hadithLoadToken) return;
+      const verses = results.filter(Boolean);
+      if(verses.length === 0){
+        hadithHint.textContent = "Aucun hadith trouvé dans cette plage — essayez d'autres numéros.";
+      }
+      state.verses = verses;
+      state.currentVerseIndex = 0;
+      verseLoading.style.display = 'none';
+      updateSizeEstimate();
+    }catch(e){
+      if(myToken !== hadithLoadToken) return;
+      verseLoading.textContent = 'Impossible de charger ce hadith — réessayez.';
+      console.error(e);
+    }
+  }
+
+  let hadithDebounce = null;
+  function debounceLoadHadith(){
+    clearTimeout(hadithDebounce);
+    hadithDebounce = setTimeout(loadHadithVerses, 450);
+  }
+
+  hadithBookSelect.addEventListener('change', ()=>{
+    state.hadithBook = hadithBookSelect.value;
+    populateHadithLangs();
+    loadHadithVerses();
+  });
+  hadithLangSelect.addEventListener('change', ()=>{
+    state.hadithLang = hadithLangSelect.value;
+    loadHadithVerses();
+  });
+  hadithFromInput.addEventListener('input', debounceLoadHadith);
+  hadithToInput.addEventListener('input', debounceLoadHadith);
+  hadithRandomBtn.addEventListener('click', ()=>{
+    const bookMeta = HADITH_BOOKS.find(b=>b.key===state.hadithBook);
+    const max = bookMeta ? bookMeta.max : 200;
+    const n = 1 + Math.floor(Math.random() * max);
+    hadithFromInput.value = n;
+    hadithToInput.value = n;
+    loadHadithVerses();
+  });
+
+  // ---------------------------------------------------------------
+  // ADHKAR — morning / evening / post-prayer remembrances
+  // ---------------------------------------------------------------
+  async function fetchAdhkarCategory(key){
+    if(adhkarCache.has(key)) return adhkarCache.get(key);
+    const cfg = ADHKAR_CATEGORIES[key];
+    const res = await fetch(cfg.url);
+    if(!res.ok) throw new Error('adhkar http ' + res.status);
+    const json = await res.json();
+    adhkarCache.set(key, json);
+    return json;
+  }
+
+  let adhkarLoadToken = 0;
+  async function loadAdhkarVerses(){
+    const myToken = ++adhkarLoadToken;
+    verseLoading.style.display = 'block';
+    verseLoading.textContent = 'Chargement des adhkar…';
+    adhkarHint.textContent = '';
+    try{
+      const data = await fetchAdhkarCategory(state.adhkarCategory);
+      if(myToken !== adhkarLoadToken) return;
+      const total = data.content.length;
+      adhkarFromInput.max = total; adhkarToInput.max = total;
+      const from = clampInt(adhkarFromInput.value, 1, total);
+      const to = clampInt(adhkarToInput.value, from, total);
+      state.adhkarFrom = from; state.adhkarTo = to;
+      const label = ADHKAR_CATEGORIES[state.adhkarCategory].label;
+      const verses = [];
+      for(let i=from-1; i<=to-1; i++){
+        const item = data.content[i];
+        if(!item) continue;
+        verses.push({
+          arabic: item.zekr,
+          translation: item.bless || '',
+          translation2: '',
+          badge: `${label} · ${i+1}/${total}${item.repeat>1 ? ' · ×'+item.repeat : ''}`,
+          globalNumber: null,
+          tajweedSegments: null,
+        });
+      }
+      adhkarHint.textContent = `${total} adhkar dans cette catégorie · ${verses.length} sélectionné(s)`;
+      state.verses = verses;
+      state.currentVerseIndex = 0;
+      verseLoading.style.display = 'none';
+      updateSizeEstimate();
+    }catch(e){
+      if(myToken !== adhkarLoadToken) return;
+      verseLoading.textContent = 'Impossible de charger ces adhkar — réessayez.';
+      console.error(e);
+    }
+  }
+
+  let adhkarDebounce = null;
+  function debounceLoadAdhkar(){
+    clearTimeout(adhkarDebounce);
+    adhkarDebounce = setTimeout(loadAdhkarVerses, 400);
+  }
+
+  adhkarCategorySelect.addEventListener('change', ()=>{
+    state.adhkarCategory = adhkarCategorySelect.value;
+    loadAdhkarVerses();
+  });
+  adhkarFromInput.addEventListener('input', debounceLoadAdhkar);
+  adhkarToInput.addEventListener('input', debounceLoadAdhkar);
+
+  // ---------------------------------------------------------------
+  // NASHEED — user-supplied background audio track
+  // ---------------------------------------------------------------
+  nasheedFileBtn.addEventListener('click', ()=> nasheedFileInput.click());
+  nasheedFileInput.addEventListener('change', ()=>{
+    const f = nasheedFileInput.files[0]; if(!f) return;
+    state.nasheedUrl = URL.createObjectURL(f);
+    nasheedPlayer.src = state.nasheedUrl;
+    nasheedFileBtn.textContent = '✓ ' + f.name;
+    nasheedFileBtn.classList.add('filled');
+    nasheedVolumeField.style.display = 'block';
+  });
+  nasheedVolumeInput.addEventListener('input', ()=>{
+    state.nasheedVolume = parseFloat(nasheedVolumeInput.value);
+    nasheedVolumeValue.textContent = Math.round(state.nasheedVolume*100) + '%';
+    if(nasheedGainNode) nasheedGainNode.gain.value = state.nasheedVolume;
+    nasheedPlayer.volume = state.nasheedVolume;
+  });
+
+
   // VERSE SEARCH — search by keyword across the whole Quran
   // ---------------------------------------------------------------
   let searchDebounce = null;
@@ -1548,9 +1929,9 @@
       return;
     }
 
-    const s = state.surahs.find(x=>x.number == state.selectedSurah);
+    const s = state.contentType === 'quran' ? state.surahs.find(x=>x.number == state.selectedSurah) : null;
     const verse = state.verses[state.currentVerseIndex];
-    if(!s || !verse) return;
+    if((state.contentType === 'quran' && !s) || !verse) return;
 
     const maxTextWidth = w*0.84;
 
@@ -1636,7 +2017,7 @@
     ctx.direction = 'ltr';
 
     // badge: surah:ayah
-    const badgeText = `${s.englishName} · ${verse.numberInSurah}/${s.numberOfAyahs}`;
+    const badgeText = verse.badge || `${s.englishName} · ${verse.numberInSurah}/${s.numberOfAyahs}`;
     ctx.font = `700 ${Math.round(w*0.03)}px "${state.translationFont}"`;
     const bw = ctx.measureText(badgeText).width + 34;
     const bh = Math.round(w*0.03) + 20;
@@ -1689,22 +2070,79 @@
   // AUDIO — two paths:
   //  1) audioPlayer: plain native playback, no CORS needed, always
   //     audible and drives the verse-by-verse timing.
-  //  2) audioCapture: separate hidden element (crossOrigin) routed
-  //     through Web Audio, used ONLY while recording so the exported
-  //     video can include narration. If this fails (host has no CORS
-  //     headers), the export simply ends up silent but the app never
-  //     breaks and the on-screen listening experience is unaffected.
+  //  2) For recording, narration audio is fetched as raw bytes and
+  //     decoded locally (fetch + decodeAudioData) instead of routed
+  //     through a <audio crossorigin> element. This matters: a tainted
+  //     cross-origin media element can still be heard live (browsers
+  //     allow that) but produces SILENT audio once captured into a
+  //     MediaStreamDestination — with no error anywhere, which is
+  //     exactly the "preview has sound, export doesn't" symptom.
+  //     Fetching bytes directly either fails cleanly (we can warn) or
+  //     succeeds with fully decoded, never-tainted PCM data.
   // ---------------------------------------------------------------
-  let audioCtxRef = null, sourceNode = null, destNode = null, graphReady = false;
+  let audioCtxRef = null, destNode = null, graphReady = false;
+  let nasheedSourceNode = null, nasheedGainNode = null, nasheedGraphReady = false;
+  let narrationCaptureWarned = false;
+
   function ensureAudioGraph(){
-    if(graphReady) return;
+    if(!audioCtxRef){
+      try{ audioCtxRef = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch(e){ console.error('AudioContext unavailable', e); return; }
+    }
+    if(!graphReady){
+      try{
+        destNode = audioCtxRef.createMediaStreamDestination();
+        graphReady = true;
+      }catch(e){ console.error('Recording audio graph unavailable, export will be silent', e); }
+    }
+    if(!nasheedGraphReady && state.nasheedUrl){
+      try{
+        nasheedSourceNode = audioCtxRef.createMediaElementSource(nasheedPlayer);
+        nasheedGainNode = audioCtxRef.createGain();
+        nasheedGainNode.gain.value = state.nasheedVolume;
+        nasheedSourceNode.connect(nasheedGainNode);
+        nasheedGainNode.connect(audioCtxRef.destination); // audible while working
+        if(destNode) nasheedGainNode.connect(destNode);   // also captured in export
+        nasheedGraphReady = true;
+      }catch(e){ console.error('Nasheed audio graph unavailable', e); }
+    }
+  }
+
+  // Fetches and decodes narration audio for capture into the recording.
+  // Returns an AudioBuffer on success, or null if unreachable / no CORS.
+  async function fetchNarrationBuffer(url){
     try{
-      audioCtxRef = new (window.AudioContext || window.webkitAudioContext)();
-      sourceNode = audioCtxRef.createMediaElementSource(audioCapture);
-      destNode = audioCtxRef.createMediaStreamDestination();
-      sourceNode.connect(destNode);
-      graphReady = true;
-    }catch(e){ console.error('Audio graph unavailable, export will be silent', e); }
+      const res = await fetch(url, { mode:'cors' });
+      if(!res.ok) return null;
+      const arrayBuffer = await res.arrayBuffer();
+      return await audioCtxRef.decodeAudioData(arrayBuffer);
+    }catch(e){
+      console.warn('Capture audio impossible pour cette piste (CORS ou réseau) :', e);
+      return null;
+    }
+  }
+
+  function playNarrationBuffer(buffer){
+    if(!buffer || !destNode) return;
+    try{
+      const src = audioCtxRef.createBufferSource();
+      src.buffer = buffer;
+      src.playbackRate.value = state.speed;
+      src.connect(destNode);
+      src.start();
+    }catch(e){ console.warn('Lecture du buffer de capture impossible', e); }
+  }
+
+  function startNasheed(){
+    if(!state.nasheedUrl) return;
+    try{
+      nasheedPlayer.currentTime = 0;
+      if(!nasheedGraphReady) nasheedPlayer.volume = state.nasheedVolume; // fallback path
+      nasheedPlayer.play().catch(()=>{});
+    }catch(e){ /* ignore */ }
+  }
+  function stopNasheed(){
+    try{ nasheedPlayer.pause(); }catch(e){ /* ignore */ }
   }
 
   function audioUrlFor(globalNumber){
@@ -1712,7 +2150,8 @@
   }
 
   function estimateDurationMs(arabicText){
-    // fallback pacing if the mp3 truly can't be reached
+    // fallback pacing if the mp3 truly can't be reached, or when the
+    // content type (hadith/adhkar) simply has no recitation audio at all
     return Math.max(1800, Math.min(9000, arabicText.length * 95));
   }
 
@@ -1723,7 +2162,6 @@
   function requestCancel(){
     state.cancelRequested = true;
     try{ audioPlayer.pause(); }catch(e){}
-    try{ audioCapture.pause(); }catch(e){}
     cancelResolvers.forEach(fn=>fn());
     cancelResolvers = [];
   }
@@ -1780,15 +2218,23 @@
   });
 
   async function playAyah(globalNumber, verseText){
+    if(!globalNumber){
+      // Pas de récitation audio disponible pour ce contenu (hadith/adhkar) :
+      // on garde un rythme naturel basé sur la longueur du texte.
+      await sleep(estimateDurationMs(verseText || '') / state.speed);
+      return;
+    }
     const url = audioUrlFor(globalNumber);
 
     // best-effort: feed the capture graph in parallel while recording
     if(state.isRecording && graphReady){
-      try{
-        audioCapture.src = url;
-        audioCapture.playbackRate = state.speed;
-        audioCapture.play().catch(()=>{});
-      }catch(e){ /* export will just be silent for this ayah */ }
+      const buffer = await fetchNarrationBuffer(url);
+      if(buffer){
+        playNarrationBuffer(buffer);
+      } else if(!narrationCaptureWarned){
+        narrationCaptureWarned = true;
+        progressText.textContent = "Capture audio indisponible (CORS du serveur audio) — la vidéo sera exportée sans narration.";
+      }
     }
 
     audioPlayer.playbackRate = state.speed;
@@ -1815,18 +2261,23 @@
   // ---------------------------------------------------------------
   async function runThroughVerses(onStep){
     state.cancelRequested = false;
-    if(state.basmala && state.selectedSurah !== 9){
-      if(onStep) onStep(-1, null);
-      await showBasmalaFrame();
-      if(state.cancelRequested) return;
-    }
-    for(let i=0;i<state.verses.length;i++){
-      if(state.cancelRequested) return;
-      state.currentVerseIndex = i;
-      state.verseChangedAt = performance.now();
-      const v = state.verses[i];
-      if(onStep) onStep(i, v);
-      await playAyah(v.globalNumber, v.arabic);
+    startNasheed();
+    try{
+      if(state.contentType === 'quran' && state.basmala && state.selectedSurah !== 9){
+        if(onStep) onStep(-1, null);
+        await showBasmalaFrame();
+        if(state.cancelRequested) return;
+      }
+      for(let i=0;i<state.verses.length;i++){
+        if(state.cancelRequested) return;
+        state.currentVerseIndex = i;
+        state.verseChangedAt = performance.now();
+        const v = state.verses[i];
+        if(onStep) onStep(i, v);
+        await playAyah(v.globalNumber, v.arabic);
+      }
+    } finally {
+      stopNasheed();
     }
   }
 
@@ -1835,6 +2286,8 @@
   // ---------------------------------------------------------------
   previewBtn.addEventListener('click', async ()=>{
     if(state.verses.length === 0 || state.isRecording) return;
+    ensureAudioGraph();
+    if(audioCtxRef && audioCtxRef.state === 'suspended') await audioCtxRef.resume();
     previewBtn.disabled = true; generateBtn.disabled = true;
     progressWrap.style.display = 'block';
     cancelBtn.style.display = 'block';
@@ -1923,6 +2376,7 @@
   async function recordCurrentFormat(labelPrefix){
     ensureAudioGraph();
     if(graphReady && audioCtxRef.state === 'suspended') await audioCtxRef.resume();
+    narrationCaptureWarned = false;
 
     const canvasStream = canvas.captureStream(30);
     const audioTracks = graphReady ? destNode.stream.getAudioTracks() : [];
@@ -1975,8 +2429,15 @@
   }
 
   function currentFilename(ext, formatLabel){
-    const s = state.surahs.find(x=>x.number == state.selectedSurah);
-    const base = `quran-studio-${s ? s.englishName.toLowerCase() : 'sourate'}-${state.fromAyah}-${state.toAyah}`;
+    let base;
+    if(state.contentType === 'quran'){
+      const s = state.surahs.find(x=>x.number == state.selectedSurah);
+      base = `quran-studio-${s ? s.englishName.toLowerCase() : 'sourate'}-${state.fromAyah}-${state.toAyah}`;
+    } else if(state.contentType === 'hadith'){
+      base = `quran-studio-hadith-${state.hadithBook || 'x'}-${state.hadithFrom}-${state.hadithTo}`;
+    } else {
+      base = `quran-studio-adhkar-${state.adhkarCategory}-${state.adhkarFrom}-${state.adhkarTo}`;
+    }
     return formatLabel ? `${base}-${formatLabel}.${ext}` : `${base}.${ext}`;
   }
 
