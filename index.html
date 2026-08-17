@@ -496,7 +496,7 @@
 
       <label class="field">
         <span class="lbl">Filigrane (discret, coin bas-gauche)</span>
-        <input type="text" id="watermarkInput" value="Younus Islam" placeholder="Nom de votre compte…" maxlength="40">
+        <input type="text" id="watermarkInput" value="Yonu Islam" placeholder="Nom de votre compte…" maxlength="40">
       </label>
 
       <label class="field">
@@ -679,34 +679,45 @@
   // Récitateurs candidats — vérifiés automatiquement au chargement de la
   // page (certains identifiants ne sont pas réellement servis par le CDN
   // à ce niveau de qualité ; on ne garde que ceux qui répondent vraiment).
-  const RECITER_CANDIDATES = [
+  // Heuristiques pour étiqueter automatiquement chaque récitateur RÉEL
+  // renvoyé par l'API (voir loadReciters) — on ne devine plus d'identifiants,
+  // on les récupère tous, puis on vérifie lesquels fonctionnent vraiment.
+  const RECITER_TAG_HINTS = [
+    { match:/alafasy/i, tags:['populaire','voix-douce','rythme-moyen'] },
+    { match:/abdulbasit|abdul.?samad/i, tags:['classique','voix-puissante','rythme-lent'] },
+    { match:/sudais/i, tags:['populaire','voix-puissante','rythme-moyen'] },
+    { match:/shuraym|shuraim/i, tags:['populaire','voix-puissante','rythme-moyen'] },
+    { match:/husary/i, tags:['classique','rythme-lent'] },
+    { match:/minshawi/i, tags:['voix-douce','rythme-moyen'] },
+    { match:/hudhaify|hudhaifi/i, tags:['rythme-rapide'] },
+    { match:/muaiqly|muaiqli/i, tags:['populaire','voix-douce','rythme-moyen'] },
+    { match:/shatri|shaatree/i, tags:['voix-douce','rythme-moyen'] },
+    { match:/ajamy/i, tags:['rythme-rapide'] },
+    { match:/rifai/i, tags:['voix-douce','rythme-lent'] },
+    { match:/ayyoub/i, tags:['rythme-moyen'] },
+    { match:/jibreel|jibril/i, tags:['rythme-moyen'] },
+    { match:/parhizgar/i, tags:['voix-douce','rythme-lent'] },
+    { match:/dossari|dosari/i, tags:['populaire','voix-douce','rythme-lent'] },
+    { match:/luhaidan/i, tags:['populaire','voix-douce','rythme-lent'] },
+    { match:/qatami/i, tags:['populaire','voix-douce','rythme-moyen'] },
+    { match:/basfar/i, tags:['classique','rythme-moyen'] },
+  ];
+  function guessReciterTags(identifier, englishName){
+    const hay = `${identifier} ${englishName}`;
+    for(const hint of RECITER_TAG_HINTS){ if(hint.match.test(hay)) return hint.tags; }
+    return ['rythme-moyen'];
+  }
+
+  // Filet de sécurité si l'API de la liste des éditions est totalement
+  // injoignable (voir catch() dans loadReciters).
+  const RECITER_FALLBACK = [
     { id:'ar.alafasy', name:'Mishary Rashid Alafasy', tags:['populaire','voix-douce','rythme-moyen'] },
     { id:'ar.abdulbasitmurattal', name:'Abdul Basit (Murattal)', tags:['classique','voix-puissante','rythme-lent'] },
-    { id:'ar.abdulsamad', name:'Abdul Basit (Mujawwad)', tags:['classique','voix-puissante','rythme-lent'] },
     { id:'ar.abdurrahmaansudais', name:'Abdur-Rahman As-Sudais', tags:['populaire','voix-puissante','rythme-moyen'] },
     { id:'ar.saoodshuraym', name:'Saud Al-Shuraim', tags:['populaire','voix-puissante','rythme-moyen'] },
     { id:'ar.husary', name:'Mahmoud Khalil Al-Husary', tags:['classique','rythme-lent'] },
-    { id:'ar.husarymujawwad', name:'Al-Husary (Mujawwad)', tags:['classique','rythme-lent'] },
     { id:'ar.minshawi', name:'Mohamed Al-Minshawi (Murattal)', tags:['voix-douce','rythme-moyen'] },
-    { id:'ar.minshawimujawwad', name:'Al-Minshawi (Mujawwad)', tags:['voix-douce','rythme-lent'] },
-    { id:'ar.hudhaify', name:'Ali Al-Hudhaify', tags:['rythme-rapide'] },
     { id:'ar.mahermuaiqly', name:'Maher Al Muaiqly', tags:['populaire','voix-douce','rythme-moyen'] },
-    { id:'ar.shaatree', name:'Abu Bakr Al-Shatri', tags:['voix-douce','rythme-moyen'] },
-    { id:'ar.ahmedajamy', name:'Ahmed Al-Ajamy', tags:['rythme-rapide'] },
-    { id:'ar.hanirifai', name:'Hani Rifai', tags:['voix-douce','rythme-lent'] },
-    { id:'ar.muhammadayyoub', name:'Muhammad Ayyoub', tags:['rythme-moyen'] },
-    { id:'ar.muhammadjibreel', name:'Muhammad Jibreel', tags:['rythme-moyen'] },
-    { id:'ar.parhizgar', name:'Shahriar Parhizgar', tags:['voix-douce','rythme-lent'] },
-    { id:'ar.yasseraldossari', name:'Yasser Al-Dossari', tags:['populaire','voix-douce','rythme-lent'] },
-    { id:'ar.muhammadalluhaidan', name:'Muhammad Al-Luhaidan', tags:['populaire','voix-douce','rythme-lent'] },
-    { id:'ar.idrisabkar', name:'Idris Abkar', tags:['voix-douce','rythme-lent'] },
-    { id:'ar.nasseralqatami', name:'Nasser Al-Qatami', tags:['populaire','voix-douce','rythme-moyen'] },
-    { id:'ar.faresabbad', name:'Fares Abbad', tags:['voix-douce','rythme-lent'] },
-    { id:'ar.bandarbaleela', name:'Bandar Baleela', tags:['voix-puissante','rythme-moyen'] },
-    { id:'ar.abdullahbasfar', name:'Abdullah Basfar', tags:['classique','rythme-moyen'] },
-    { id:'ar.salahbukhatir', name:'Salah Bukhatir', tags:['voix-douce','rythme-moyen'] },
-    { id:'ar.alihajjajalsuwaidan', name:'Ali Al-Hajjaj', tags:['voix-douce','rythme-moyen'] },
-    { id:'ar.wadeeyamani', name:'Wadee Al-Yamani', tags:['voix-douce','rythme-lent'] },
   ];
 
   const RECITER_TAGS = [
@@ -715,6 +726,7 @@
     { key:'voix-douce', label:'Voix douce' },
     { key:'voix-puissante', label:'Voix puissante' },
     { key:'rythme-lent', label:'Lent' },
+    { key:'rythme-moyen', label:'Rythme moyen' },
     { key:'rythme-rapide', label:'Rapide' },
     { key:'classique', label:'Classique' },
   ];
@@ -882,7 +894,7 @@
     arabicColor: '#f5f1e6',
     translationColor: '#cfe3dc',
     accentColor: '#c9a24b',
-    watermarkText: 'Younus Islam',
+    watermarkText: 'Yonu Islam',
     arabicTextScale: 1,
     translationTextScale: 1,
     verseGap: 1,
@@ -1048,7 +1060,20 @@
   }
 
   async function loadReciters(){
-    const results = await Promise.all(RECITER_CANDIDATES.map(async (c)=>{
+    let candidates;
+    try{
+      const data = await fetchJSON(`${API}/edition?format=audio&language=ar`);
+      candidates = data.map(r => ({
+        id: r.identifier,
+        name: r.englishName || r.name,
+        tags: guessReciterTags(r.identifier, r.englishName || r.name)
+      }));
+    }catch(e){
+      console.warn('Liste des récitateurs indisponible via l\'API, repli sur la liste de secours', e);
+      candidates = RECITER_FALLBACK;
+    }
+
+    const results = await Promise.all(candidates.map(async (c)=>{
       const ok = await verifyReciter(c);
       return {...c, available: ok};
     }));
