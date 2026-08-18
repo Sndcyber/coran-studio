@@ -684,9 +684,9 @@
   // on les récupère tous, puis on vérifie lesquels fonctionnent vraiment.
   const RECITER_TAG_HINTS = [
     { match:/alafasy/i, tags:['populaire','voix-douce','rythme-moyen'] },
-    { match:/abdulbasit|abdul.?samad/i, tags:['classique','voix-puissante','rythme-lent'] },
+    { match:/abdulbasit/i, tags:['classique','voix-puissante','rythme-lent'] },
     { match:/sudais/i, tags:['populaire','voix-puissante','rythme-moyen'] },
-    { match:/shuraym|shuraim/i, tags:['populaire','voix-puissante','rythme-moyen'] },
+    { match:/shuraim|shuraym/i, tags:['populaire','voix-puissante','rythme-moyen'] },
     { match:/husary/i, tags:['classique','rythme-lent'] },
     { match:/minshawi/i, tags:['voix-douce','rythme-moyen'] },
     { match:/hudhaify|hudhaifi/i, tags:['rythme-rapide'] },
@@ -694,7 +694,7 @@
     { match:/shatri|shaatree/i, tags:['voix-douce','rythme-moyen'] },
     { match:/ajamy/i, tags:['rythme-rapide'] },
     { match:/rifai/i, tags:['voix-douce','rythme-lent'] },
-    { match:/ayyoub/i, tags:['rythme-moyen'] },
+    { match:/ayoub|ayyoub/i, tags:['rythme-moyen'] },
     { match:/jibreel|jibril/i, tags:['rythme-moyen'] },
     { match:/parhizgar/i, tags:['voix-douce','rythme-lent'] },
     { match:/dossari|dosari/i, tags:['populaire','voix-douce','rythme-lent'] },
@@ -712,12 +712,18 @@
   // injoignable (voir catch() dans loadReciters).
   const RECITER_FALLBACK = [
     { id:'ar.alafasy', name:'Mishary Rashid Alafasy', tags:['populaire','voix-douce','rythme-moyen'] },
-    { id:'ar.abdulbasitmurattal', name:'Abdul Basit (Murattal)', tags:['classique','voix-puissante','rythme-lent'] },
-    { id:'ar.abdurrahmaansudais', name:'Abdur-Rahman As-Sudais', tags:['populaire','voix-puissante','rythme-moyen'] },
-    { id:'ar.saoodshuraym', name:'Saud Al-Shuraim', tags:['populaire','voix-puissante','rythme-moyen'] },
+    { id:'ar.abdulbasit', name:'Abdul Basit Abdul Samad (Murattal)', tags:['classique','voix-puissante','rythme-lent'] },
+    { id:'ar.abdulbasitmujawwad', name:'Abdul Basit Abdul Samad (Mujawwad)', tags:['classique','voix-puissante','rythme-lent'] },
+    { id:'ar.sudais', name:'Abdul Rahman Al-Sudais', tags:['populaire','voix-puissante','rythme-moyen'] },
+    { id:'ar.shuraim', name:'Saud Al-Shuraim', tags:['populaire','voix-puissante','rythme-moyen'] },
     { id:'ar.husary', name:'Mahmoud Khalil Al-Husary', tags:['classique','rythme-lent'] },
-    { id:'ar.minshawi', name:'Mohamed Al-Minshawi (Murattal)', tags:['voix-douce','rythme-moyen'] },
-    { id:'ar.mahermuaiqly', name:'Maher Al Muaiqly', tags:['populaire','voix-douce','rythme-moyen'] },
+    { id:'ar.minshawi', name:'Mohamed Siddiq Al-Minshawi', tags:['voix-douce','rythme-moyen'] },
+    { id:'ar.minshawimujawwad', name:'Al-Minshawi (Mujawwad)', tags:['voix-douce','rythme-lent'] },
+    { id:'ar.hudhaify', name:'Ali Al-Hudhaify', tags:['rythme-rapide'] },
+    { id:'ar.ajamy', name:'Ahmed ibn Ali Al-Ajamy', tags:['rythme-rapide'] },
+    { id:'ar.muhammadayoub', name:'Muhammad Ayyoub', tags:['rythme-moyen'] },
+    { id:'ar.muhammadjibreel', name:'Muhammad Jibreel', tags:['rythme-moyen'] },
+    { id:'ar.parhizgar', name:'Mahmoud Khalil Al-Husary (Muallim)', tags:['voix-douce','rythme-lent'] },
   ];
 
   const RECITER_TAGS = [
@@ -1016,6 +1022,17 @@
     return json.data;
   }
 
+  // Récupère UNE FOIS la liste complète (texte + audio, toutes langues) des
+  // éditions officielles, puis on filtre nous-mêmes côté client. Plus fiable
+  // que de deviner quels paramètres de requête l'API accepte réellement —
+  // seul l'endpoint de base "/edition" est garanti par la documentation
+  // officielle (https://alquran.cloud/cdn, https://alquran.cloud/api).
+  let allEditionsPromise = null;
+  function fetchAllEditions(){
+    if(!allEditionsPromise) allEditionsPromise = fetchJSON(`${API}/edition`);
+    return allEditionsPromise;
+  }
+
   async function loadSurahs(){
     try{
       const data = await fetchJSON(`${API}/surah`);
@@ -1062,12 +1079,15 @@
   async function loadReciters(){
     let candidates;
     try{
-      const data = await fetchJSON(`${API}/edition?format=audio&language=ar`);
-      candidates = data.map(r => ({
-        id: r.identifier,
-        name: r.englishName || r.name,
-        tags: guessReciterTags(r.identifier, r.englishName || r.name)
-      }));
+      const all = await fetchAllEditions();
+      candidates = all
+        .filter(r => r.format === 'audio' && r.language === 'ar')
+        .map(r => ({
+          id: r.identifier,
+          name: r.englishName || r.name,
+          tags: guessReciterTags(r.identifier, r.englishName || r.name)
+        }));
+      if(candidates.length === 0) throw new Error('Aucune édition audio arabe trouvée dans la liste complète');
     }catch(e){
       console.warn('Liste des récitateurs indisponible via l\'API, repli sur la liste de secours', e);
       candidates = RECITER_FALLBACK;
@@ -1135,7 +1155,9 @@
 
   async function loadTranslations(){
     try{
-      const data = await fetchJSON(`${API}/edition?format=text&type=translation`);
+      const all = await fetchAllEditions();
+      const data = all.filter(t => t.format === 'text' && t.type === 'translation');
+      if(data.length === 0) throw new Error('Aucune traduction trouvée dans la liste complète');
       const priority = ['fr','en','ur','id','tr','es','de','ru','bn'];
       data.sort((a,b)=>{
         const ia = priority.indexOf(a.language), ib = priority.indexOf(b.language);
