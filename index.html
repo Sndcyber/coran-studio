@@ -164,11 +164,25 @@
   .frame-wrap::before{ top:-10px; left:-10px; border-right:none; border-bottom:none; }
   .frame-wrap::after{ bottom:-10px; right:-10px; border-left:none; border-top:none; }
 
+  .stage-toolbar{ display:flex; gap:10px; margin-bottom:-6px; }
+  .toolbar-btn{
+    background:linear-gradient(180deg,var(--gold-light),var(--gold));
+    color:var(--ink); border:none; font-weight:800; font-size:12.5px;
+    padding:9px 16px; border-radius:20px; cursor:pointer;
+    box-shadow:0 6px 16px rgba(201,162,75,0.3);
+    transition:transform .12s ease;
+  }
+  .toolbar-btn:hover{ transform:translateY(-1px); }
+
   canvas#stageCanvas{
     display:block; border-radius:10px; background:#000;
     box-shadow:var(--shadow);
     border:1px solid var(--line);
+    touch-action:none;
+    cursor:default;
   }
+  canvas#stageCanvas.has-hover{ cursor:grab; }
+  canvas#stageCanvas.is-dragging{ cursor:grabbing; }
 
   .lib-title{ font-size:11px; color:var(--text-muted); margin:12px 0 8px; letter-spacing:0.4px; }
   .lib-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:7px; }
@@ -234,6 +248,16 @@
   .preset-item:hover{ border-color:var(--gold); }
   .preset-item .del{ color:var(--text-muted); font-size:11px; padding:2px 6px; }
   .preset-item .del:hover{ color:var(--rec); }
+
+  .custom-text-list{ display:flex; flex-direction:column; gap:6px; margin-top:10px; }
+  .custom-text-item{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    background:var(--ink-2); border:1px solid var(--line); border-radius:8px; padding:8px 10px;
+    font-size:12px; cursor:pointer; transition:all .15s ease;
+  }
+  .custom-text-item:hover{ border-color:var(--gold); }
+  .custom-text-item.active{ border-color:var(--gold); box-shadow:0 0 0 1px var(--gold) inset; }
+  .custom-text-item span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
   .rec-indicator{
     position:absolute; top:14px; left:14px; display:none;
@@ -407,6 +431,14 @@
           <span id="speedValue">1.00x</span>
         </div>
       </label>
+      <label class="field">
+        <span class="lbl">Volume de la récitation</span>
+        <div class="range-row">
+          <input type="range" id="recitationVolumeInput" min="0" max="1" step="0.05" value="1">
+          <span id="recitationVolumeValue">100%</span>
+        </div>
+      </label>
+      <div class="hint warn">⚠️ Les enregistrements des récitateurs connus (Sudais, Alafasy, Abdul Basit…) sont souvent inscrits au Content ID de YouTube par leurs ayants droit — même si le texte coranique n'est lui-même soumis à aucun droit d'auteur. Dans la plupart des cas, ça redirige simplement la monétisation vers l'ayant droit sans bloquer la vidéo, mais ce n'est pas garanti. Pour une vidéo sans aucun risque : passez en mode <b>Hadith</b> ou <b>Adhkar</b> (pas de récitation officielle) et ajoutez votre propre nasheed en fond sonore ci-dessous.</div>
     </div>
 
     <div class="group">
@@ -440,6 +472,8 @@
 
     <div class="group">
       <div class="group-title"><span class="dash"></span>Texte</div>
+
+      <label class="checkline"><input type="checkbox" id="showArabicChk" checked> Afficher le texte arabe</label>
 
       <label class="field">
         <span class="lbl">Police du verset (arabe)</span>
@@ -513,6 +547,70 @@
     </div>
 
     <div class="group">
+      <div class="group-title"><span class="dash"></span>Textes personnalisés</div>
+      <button class="secondary" id="addTextBtn" style="width:100%;">➕ Ajouter un texte</button>
+      <div class="custom-text-list" id="customTextList"></div>
+
+      <div id="customTextEditor" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid var(--line);">
+        <label class="field">
+          <span class="lbl">Contenu</span>
+          <input type="text" id="customTextContent" maxlength="80">
+        </label>
+        <label class="field">
+          <span class="lbl">Police</span>
+          <select id="customTextFont">
+            <option value="Amiri">Amiri</option>
+            <option value="Scheherazade New">Scheherazade New</option>
+            <option value="Noto Naskh Arabic">Noto Naskh Arabic</option>
+            <option value="Reem Kufi">Reem Kufi</option>
+            <option value="Manrope">Manrope</option>
+            <option value="Lora">Lora</option>
+            <option value="Poppins">Poppins</option>
+            <option value="Inter">Inter</option>
+          </select>
+        </label>
+        <div class="row2">
+          <label class="field">
+            <span class="lbl">Couleur</span>
+            <input type="color" id="customTextColor" value="#f5f1e6">
+          </label>
+          <label class="field">
+            <span class="lbl">Épaisseur</span>
+            <select id="customTextWeight">
+              <option value="400">Normal</option>
+              <option value="600">Semi-gras</option>
+              <option value="700" selected>Gras</option>
+              <option value="900">Extra-gras</option>
+            </select>
+          </label>
+        </div>
+        <label class="field">
+          <span class="lbl">Taille</span>
+          <div class="range-row">
+            <input type="range" id="customTextSize" min="0.02" max="0.14" step="0.005" value="0.05">
+            <span id="customTextSizeValue">5%</span>
+          </div>
+        </label>
+        <label class="field">
+          <span class="lbl">Rotation</span>
+          <div class="range-row">
+            <input type="range" id="customTextRotation" min="-45" max="45" step="1" value="0">
+            <span id="customTextRotationValue">0°</span>
+          </div>
+        </label>
+        <label class="field">
+          <span class="lbl">Opacité</span>
+          <div class="range-row">
+            <input type="range" id="customTextOpacity" min="0.1" max="1" step="0.05" value="1">
+            <span id="customTextOpacityValue">100%</span>
+          </div>
+        </label>
+        <button class="secondary" id="deleteTextBtn" style="width:100%; color:var(--rec); border-color:var(--rec);">🗑 Supprimer ce texte</button>
+      </div>
+      <div class="hint">Astuce : cliquez-glissez le texte directement sur l'aperçu pour le repositionner où vous voulez.</div>
+    </div>
+
+    <div class="group">
       <div class="group-title"><span class="dash"></span>Mes styles</div>
       <div class="row2">
         <button class="secondary" id="savePresetBtn" style="width:100%;">💾 Enregistrer ce style</button>
@@ -571,10 +669,14 @@
 
   <!-- ======================= STAGE ======================= -->
   <div class="stage">
+    <div class="stage-toolbar">
+      <button class="toolbar-btn" id="addTextBtnStage">✏️ Ajouter un texte</button>
+    </div>
     <div class="frame-wrap">
       <canvas id="stageCanvas" width="608" height="1080"></canvas>
       <div class="rec-indicator" id="recIndicator"><span class="rec-dot"></span>ENREGISTREMENT</div>
     </div>
+    <div class="hint" id="dragHint">💡 Cliquez-glissez un texte directement sur l'aperçu pour le déplacer.</div>
 
     <div class="verse-loading" id="verseLoading">Chargement des versets…</div>
 
@@ -893,6 +995,7 @@
     reciters: [],
     translation: null,
     translation2: null,
+    showArabic: true,
     showTranslation: true,
     showSecondTranslation: false,
     arabicFont: 'Amiri',
@@ -909,6 +1012,9 @@
     karaoke: false,
     basmala: false,
     speed: 1,
+    recitationVolume: 1,
+    customTexts: [],       // [{id, text, x, y, font, color, weight, size, rotation, opacity, _box}]
+    selectedTextId: null,
     contentType: 'quran',   // 'quran' | 'hadith' | 'adhkar'
     hadithBooks: [],
     hadithBook: null,
@@ -948,6 +1054,7 @@
   const reciterList = el('reciterList');
   const translationSelect = el('translationSelect');
   const translationSelect2 = el('translationSelect2');
+  const showArabicChk = el('showArabicChk');
   const showTranslationChk = el('showTranslation');
   const showSecondTranslationChk = el('showSecondTranslation');
   const secondTranslationField = el('secondTranslationField');
@@ -978,6 +1085,23 @@
   const basmalaChk = el('basmalaChk');
   const speedInput = el('speedInput');
   const speedValue = el('speedValue');
+  const recitationVolumeInput = el('recitationVolumeInput');
+  const recitationVolumeValue = el('recitationVolumeValue');
+  const addTextBtn = el('addTextBtn');
+  const addTextBtnStage = el('addTextBtnStage');
+  const customTextList = el('customTextList');
+  const customTextEditor = el('customTextEditor');
+  const customTextContentInput = el('customTextContent');
+  const customTextFontSelect = el('customTextFont');
+  const customTextColorInput = el('customTextColor');
+  const customTextWeightSelect = el('customTextWeight');
+  const customTextSizeInput = el('customTextSize');
+  const customTextSizeValue = el('customTextSizeValue');
+  const customTextRotationInput = el('customTextRotation');
+  const customTextRotationValue = el('customTextRotationValue');
+  const customTextOpacityInput = el('customTextOpacity');
+  const customTextOpacityValue = el('customTextOpacityValue');
+  const deleteTextBtn = el('deleteTextBtn');
   const tajweedChk = el('tajweedChk');
   const karaokeChk = el('karaokeChk');
   const textPosSeg = el('textPosSeg');
@@ -2105,17 +2229,17 @@
     const coloredLines = useColoredLayout ? wrapColoredWords(arabicWords, wordColors, arabicFontSpec, maxTextWidth) : null;
 
     const gapPx = w*0.028 * state.verseGap;
-    let totalBlockH = arFit.lines.length * arFit.size * 1.5;
+    let totalBlockH = state.showArabic ? arFit.lines.length * arFit.size * 1.5 : 0;
     let transFit = null, trans2Fit = null;
     if(state.showTranslation && verse.translation){
       transFit = fitText(verse.translation, state.translationFont, 500, maxTextWidth, 5,
         Math.round(w*0.036*state.translationTextScale), Math.round(w*0.024*state.translationTextScale));
-      totalBlockH += gapPx + transFit.lines.length * transFit.size * 1.45;
+      totalBlockH += (state.showArabic ? gapPx : 0) + transFit.lines.length * transFit.size * 1.45;
     }
     if(state.showSecondTranslation && verse.translation2){
       trans2Fit = fitText(verse.translation2, state.translationFont, 500, maxTextWidth, 5,
         Math.round(w*0.032*state.translationTextScale), Math.round(w*0.022*state.translationTextScale));
-      totalBlockH += gapPx*0.7 + trans2Fit.lines.length * trans2Fit.size * 1.4;
+      totalBlockH += ((state.showArabic || transFit) ? gapPx*0.7 : 0) + trans2Fit.lines.length * trans2Fit.size * 1.4;
     }
 
     // vertical placement per state.textPosition
@@ -2126,22 +2250,24 @@
 
     const karaokeIndex = getKaraokeWordIndex(arabicWords.length);
 
-    ctx.font = arabicFontSpec;
-    ctx.direction = 'rtl';
-    if(useColoredLayout){
-      for(const line of coloredLines){
-        cy += arFit.size*1.5;
-        drawColoredArabicLine(line, cy, cx, arabicFontSpec, state.arabicColor, karaokeIndex);
-      }
-    } else {
-      for(const line of arFit.lines){
-        cy += arFit.size*1.5;
-        ctx.fillText(line, cx, cy);
+    if(state.showArabic){
+      ctx.font = arabicFontSpec;
+      ctx.direction = 'rtl';
+      if(useColoredLayout){
+        for(const line of coloredLines){
+          cy += arFit.size*1.5;
+          drawColoredArabicLine(line, cy, cx, arabicFontSpec, state.arabicColor, karaokeIndex);
+        }
+      } else {
+        for(const line of arFit.lines){
+          cy += arFit.size*1.5;
+          ctx.fillText(line, cx, cy);
+        }
       }
     }
 
     if(transFit){
-      cy += gapPx;
+      cy += state.showArabic ? gapPx : 0;
       ctx.direction = 'ltr';
       ctx.font = `500 ${transFit.size}px "${state.translationFont}"`;
       ctx.fillStyle = state.translationColor;
@@ -2151,7 +2277,7 @@
       }
     }
     if(trans2Fit){
-      cy += gapPx*0.7;
+      cy += (state.showArabic || transFit) ? gapPx*0.7 : 0;
       ctx.direction = 'ltr';
       ctx.font = `italic 500 ${trans2Fit.size}px "${state.translationFont}"`;
       ctx.fillStyle = state.translationColor;
@@ -2196,11 +2322,64 @@
   }
 
   // ---------------------------------------------------------------
+  // CUSTOM DRAGGABLE TEXT LAYERS
+  // ---------------------------------------------------------------
+  function isArabicText(text){
+    return /[\u0600-\u06FF]/.test(text);
+  }
+
+  function drawCustomTexts(w, h){
+    if(state.customTexts.length === 0) return;
+    ctx.textBaseline = 'middle';
+    for(const layer of state.customTexts){
+      if(!layer.text) { layer._box = null; continue; }
+      const fontSize = Math.max(10, Math.round(w * layer.size));
+      ctx.font = `${layer.weight} ${fontSize}px "${layer.font}"`;
+      const metrics = ctx.measureText(layer.text);
+      const textWidth = metrics.width;
+      const textHeight = fontSize * 1.25;
+      const cx = w * layer.x, cy = h * layer.y;
+
+      // hit-box in canvas pixels, used for drag detection (kept axis-aligned
+      // for simplicity even when rotated — generous padding compensates)
+      const pad = fontSize * 0.35;
+      layer._box = {
+        left: cx - textWidth/2 - pad, right: cx + textWidth/2 + pad,
+        top: cy - textHeight/2 - pad, bottom: cy + textHeight/2 + pad,
+      };
+
+      ctx.save();
+      ctx.globalAlpha = layer.opacity;
+      ctx.fillStyle = layer.color;
+      ctx.translate(cx, cy);
+      ctx.rotate(layer.rotation * Math.PI / 180);
+      ctx.direction = isArabicText(layer.text) ? 'rtl' : 'ltr';
+      ctx.textAlign = 'center';
+      ctx.fillText(layer.text, 0, 0);
+      ctx.restore();
+
+      // selection outline — editor aid only, never baked into the export
+      if(!state.isRecording && layer.id === state.selectedTextId){
+        ctx.save();
+        ctx.strokeStyle = state.accentColor;
+        ctx.lineWidth = Math.max(1.5, w*0.0025);
+        ctx.setLineDash([w*0.012, w*0.008]);
+        ctx.strokeRect(layer._box.left, layer._box.top,
+          layer._box.right - layer._box.left, layer._box.bottom - layer._box.top);
+        ctx.restore();
+      }
+    }
+    ctx.textBaseline = 'alphabetic'; // restore default relied on elsewhere
+    ctx.direction = 'ltr';
+  }
+
+  // ---------------------------------------------------------------
   // RENDER LOOP
   // ---------------------------------------------------------------
   function renderFrame(t){
     drawBackground(t);
     drawForeground(t);
+    drawCustomTexts(canvas.width, canvas.height);
   }
 
   function loop(ts){
@@ -2231,6 +2410,7 @@
   //     succeeds with fully decoded, never-tainted PCM data.
   // ---------------------------------------------------------------
   let audioCtxRef = null, destNode = null, graphReady = false;
+  let narrationGainNode = null;
   let nasheedSourceNode = null, nasheedGainNode = null, nasheedGraphReady = false;
   let narrationCaptureWarned = false;
 
@@ -2242,6 +2422,9 @@
     if(!graphReady){
       try{
         destNode = audioCtxRef.createMediaStreamDestination();
+        narrationGainNode = audioCtxRef.createGain();
+        narrationGainNode.gain.value = state.recitationVolume;
+        narrationGainNode.connect(destNode);
         graphReady = true;
       }catch(e){ console.error('Recording audio graph unavailable, export will be silent', e); }
     }
@@ -2283,7 +2466,7 @@
       const src = audioCtxRef.createBufferSource();
       src.buffer = buffer;
       src.playbackRate.value = state.speed;
-      src.connect(destNode);
+      src.connect(narrationGainNode || destNode);
       src.start();
     }catch(e){ console.warn('Lecture du buffer de capture impossible', e); }
   }
@@ -2396,6 +2579,7 @@
     }
 
     audioPlayer.playbackRate = state.speed;
+    audioPlayer.volume = state.recitationVolume;
     await playOnce(audioPlayer, url);
     if(audioPlayer.error){
       // one retry in case of a transient network hiccup
@@ -2480,10 +2664,18 @@
     // On tente d'abord un vrai enregistrement natif en .mp4 (Safari/iOS le
     // supportent nativement). Si le navigateur ne sait pas, on se rabat sur
     // .webm puis on convertit en .mp4 via ffmpeg.wasm après l'enregistrement.
+    //
+    // Important : on n'accepte QUE des chaînes de codec explicites ici.
+    // Le type MIME générique 'video/mp4' (sans codec précisé) peut être
+    // signalé comme "supporté" par isTypeSupported() sur certains
+    // navigateurs/environnements tout en produisant en réalité un fichier
+    // SANS piste vidéo (confirmé par test) — un faux positif silencieux et
+    // dangereux. Une chaîne de codec explicite est un signal bien plus
+    // fiable d'un véritable encodeur mp4 natif disponible.
     const mp4Options = [
       'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
       'video/mp4;codecs=h264,aac',
-      'video/mp4'
+      'video/mp4;codecs=avc1',
     ];
     for(const o of mp4Options){ if(window.MediaRecorder && MediaRecorder.isTypeSupported(o)) return {mimeType:o, isMp4:true}; }
     const webmOptions = [
@@ -2726,6 +2918,7 @@
   fromAyahInput.addEventListener('input', debounceLoadVerses);
   toAyahInput.addEventListener('input', debounceLoadVerses);
     translationSelect.addEventListener('change', ()=>{ state.translation = translationSelect.value; loadVerses(); });
+  showArabicChk.addEventListener('change', ()=>{ state.showArabic = showArabicChk.checked; });
   showTranslationChk.addEventListener('change', ()=>{ state.showTranslation = showTranslationChk.checked; });
 
   const arabicFontSelect = el('arabicFontSelect');
@@ -2778,6 +2971,13 @@
     speedValue.textContent = state.speed.toFixed(2) + 'x';
     audioPlayer.playbackRate = state.speed;
     updateSizeEstimate();
+  });
+
+  recitationVolumeInput.addEventListener('input', ()=>{
+    state.recitationVolume = parseFloat(recitationVolumeInput.value);
+    recitationVolumeValue.textContent = Math.round(state.recitationVolume * 100) + '%';
+    audioPlayer.volume = state.recitationVolume;
+    if(narrationGainNode) narrationGainNode.gain.value = state.recitationVolume;
   });
 
   tajweedChk.addEventListener('change', ()=>{ state.tajweed = tajweedChk.checked; loadVerses(); });
@@ -2915,6 +3115,163 @@
     const totalMB = totalBits / 8 / 1024 / 1024;
     sizeEstimate.textContent = `Durée estimée : ~${Math.round(totalSec)}s · Taille estimée : ~${totalMB.toFixed(1)} Mo`;
   }
+
+  // ---------------------------------------------------------------
+  // CUSTOM TEXT LAYERS — add / edit / delete / drag on the canvas
+  // ---------------------------------------------------------------
+  function uid(){ return 'txt_' + Math.random().toString(36).slice(2,9); }
+
+  function getSelectedText(){
+    return state.customTexts.find(l => l.id === state.selectedTextId);
+  }
+
+  function renderCustomTextList(){
+    if(state.customTexts.length === 0){ customTextList.innerHTML = ''; return; }
+    customTextList.innerHTML = state.customTexts.map(l => `
+      <div class="custom-text-item${l.id===state.selectedTextId?' active':''}" data-id="${l.id}">
+        <span>${(l.text || '(vide)').replace(/</g,'&lt;')}</span>
+      </div>
+    `).join('');
+  }
+
+  function openTextEditor(layer){
+    customTextEditor.style.display = 'block';
+    customTextContentInput.value = layer.text;
+    customTextFontSelect.value = layer.font;
+    customTextColorInput.value = layer.color;
+    customTextWeightSelect.value = layer.weight;
+    customTextSizeInput.value = layer.size;
+    customTextSizeValue.textContent = Math.round(layer.size * 100) + '%';
+    customTextRotationInput.value = layer.rotation;
+    customTextRotationValue.textContent = layer.rotation + '°';
+    customTextOpacityInput.value = layer.opacity;
+    customTextOpacityValue.textContent = Math.round(layer.opacity * 100) + '%';
+  }
+
+  function closeTextEditor(){
+    customTextEditor.style.display = 'none';
+    state.selectedTextId = null;
+    renderCustomTextList();
+  }
+
+  function selectText(layer){
+    state.selectedTextId = layer.id;
+    renderCustomTextList();
+    openTextEditor(layer);
+  }
+
+  function addCustomText(){
+    const layer = {
+      id: uid(), text: 'Nouveau texte', x: 0.5, y: 0.78,
+      font: 'Manrope', color: '#f5f1e6', weight: '700',
+      size: 0.05, rotation: 0, opacity: 1,
+    };
+    state.customTexts.push(layer);
+    selectText(layer);
+    customTextEditor.scrollIntoView({ behavior:'smooth', block:'center' });
+  }
+  addTextBtn.addEventListener('click', addCustomText);
+  addTextBtnStage.addEventListener('click', addCustomText);
+
+  customTextList.addEventListener('click', (e)=>{
+    const item = e.target.closest('.custom-text-item'); if(!item) return;
+    const layer = state.customTexts.find(l=>l.id===item.dataset.id);
+    if(layer) selectText(layer);
+  });
+
+  customTextContentInput.addEventListener('input', ()=>{
+    const l = getSelectedText(); if(!l) return;
+    l.text = customTextContentInput.value;
+    renderCustomTextList();
+  });
+  customTextFontSelect.addEventListener('change', ()=>{
+    const l = getSelectedText(); if(l) l.font = customTextFontSelect.value;
+  });
+  customTextColorInput.addEventListener('input', ()=>{
+    const l = getSelectedText(); if(l) l.color = customTextColorInput.value;
+  });
+  customTextWeightSelect.addEventListener('change', ()=>{
+    const l = getSelectedText(); if(l) l.weight = customTextWeightSelect.value;
+  });
+  customTextSizeInput.addEventListener('input', ()=>{
+    const l = getSelectedText(); if(!l) return;
+    l.size = parseFloat(customTextSizeInput.value);
+    customTextSizeValue.textContent = Math.round(l.size * 100) + '%';
+  });
+  customTextRotationInput.addEventListener('input', ()=>{
+    const l = getSelectedText(); if(!l) return;
+    l.rotation = parseFloat(customTextRotationInput.value);
+    customTextRotationValue.textContent = l.rotation + '°';
+  });
+  customTextOpacityInput.addEventListener('input', ()=>{
+    const l = getSelectedText(); if(!l) return;
+    l.opacity = parseFloat(customTextOpacityInput.value);
+    customTextOpacityValue.textContent = Math.round(l.opacity * 100) + '%';
+  });
+  deleteTextBtn.addEventListener('click', ()=>{
+    state.customTexts = state.customTexts.filter(l => l.id !== state.selectedTextId);
+    closeTextEditor();
+  });
+
+  // --- drag directly on the canvas preview ---
+  function canvasPointFromEvent(e){
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const px = (e.clientX - rect.left) * scaleX;
+    const py = (e.clientY - rect.top) * scaleY;
+    return { px, py, relX: px / canvas.width, relY: py / canvas.height };
+  }
+
+  function hitTestCustomText(px, py){
+    for(let i = state.customTexts.length - 1; i >= 0; i--){
+      const l = state.customTexts[i];
+      if(l._box && px >= l._box.left && px <= l._box.right && py >= l._box.top && py <= l._box.bottom){
+        return l;
+      }
+    }
+    return null;
+  }
+
+  let draggingTextId = null;
+  let dragOffset = { x:0, y:0 };
+
+  canvas.addEventListener('pointerdown', (e)=>{
+    const { px, py, relX, relY } = canvasPointFromEvent(e);
+    const hit = hitTestCustomText(px, py);
+    if(hit){
+      draggingTextId = hit.id;
+      selectText(hit);
+      dragOffset = { x: relX - hit.x, y: relY - hit.y };
+      canvas.classList.add('is-dragging');
+      canvas.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    } else if(state.selectedTextId){
+      closeTextEditor();
+    }
+  });
+
+  canvas.addEventListener('pointermove', (e)=>{
+    const { px, py, relX, relY } = canvasPointFromEvent(e);
+    if(draggingTextId){
+      const l = state.customTexts.find(t=>t.id===draggingTextId);
+      if(l){
+        l.x = Math.min(0.97, Math.max(0.03, relX - dragOffset.x));
+        l.y = Math.min(0.97, Math.max(0.03, relY - dragOffset.y));
+      }
+      e.preventDefault();
+    } else {
+      canvas.classList.toggle('has-hover', !!hitTestCustomText(px, py));
+    }
+  });
+
+  function endTextDrag(){
+    draggingTextId = null;
+    canvas.classList.remove('is-dragging');
+  }
+  canvas.addEventListener('pointerup', endTextDrag);
+  canvas.addEventListener('pointercancel', endTextDrag);
+  canvas.addEventListener('pointerleave', endTextDrag);
 
   // ---------------------------------------------------------------
   // INIT
