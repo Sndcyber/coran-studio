@@ -3292,7 +3292,110 @@
     await loadSurahs();
     await Promise.all([loadReciters(), loadTranslations()]);
     loadVerses();
+    window.__quranStudioReady = true;
   })();
+
+  // ---------------------------------------------------------------
+  // AUTOMATION HOOK — used by external scripts (headless browser /
+  // GitHub Actions) to generate a fully randomized video without any
+  // manual UI interaction. Not used by the interface itself.
+  // ---------------------------------------------------------------
+  function blobToBase64(blob){
+    return new Promise((resolve, reject)=>{
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  window.QuranStudioAutomation = {
+    async generateRandomVideo(opts = {}){
+      if(state.isRecording) throw new Error('Une génération est déjà en cours.');
+      if(!window.__quranStudioReady) throw new Error("L'application n'a pas fini de charger.");
+
+      state.customTexts = [];
+      state.selectedTextId = null;
+
+      const contentTypes = opts.contentTypes && opts.contentTypes.length ? opts.contentTypes : ['quran'];
+      state.contentType = contentTypes[Math.floor(Math.random() * contentTypes.length)];
+      state.verses = [];
+      state.currentVerseIndex = 0;
+      updateContentTypeUI();
+
+      if(state.contentType === 'quran'){
+        if(state.surahs.length === 0) throw new Error('Liste des sourates indisponible.');
+        const surah = state.surahs[Math.floor(Math.random() * state.surahs.length)];
+        state.selectedSurah = surah.number;
+        surahSelect.value = surah.number;
+        const from = 1 + Math.floor(Math.random() * surah.numberOfAyahs);
+        const span = Math.min(surah.numberOfAyahs - from + 1, 1 + Math.floor(Math.random() * 4));
+        fromAyahInput.value = from;
+        toAyahInput.value = from + span - 1;
+        if(state.reciters.length > 0){
+          state.reciter = state.reciters[Math.floor(Math.random() * state.reciters.length)].id;
+        }
+        state.basmala = Math.random() < 0.3;
+        await loadVerses();
+      } else if(state.contentType === 'hadith'){
+        if(state.hadithBooks.length === 0) await loadHadithBooks();
+        if(state.hadithBooks.length === 0) throw new Error('Recueils de hadith indisponibles.');
+        const book = state.hadithBooks[Math.floor(Math.random() * state.hadithBooks.length)];
+        state.hadithBook = book.key;
+        hadithBookSelect.value = book.key;
+        populateHadithLangs();
+        const bookMeta = HADITH_BOOKS.find(b => b.key === book.key);
+        const n = 1 + Math.floor(Math.random() * (bookMeta ? bookMeta.max : 200));
+        hadithFromInput.value = n;
+        hadithToInput.value = n;
+        await loadHadithVerses();
+      } else {
+        const cats = Object.keys(ADHKAR_CATEGORIES);
+        state.adhkarCategory = cats[Math.floor(Math.random() * cats.length)];
+        adhkarCategorySelect.value = state.adhkarCategory;
+        const data = await fetchAdhkarCategory(state.adhkarCategory);
+        const total = data.content.length;
+        const from = 1 + Math.floor(Math.random() * Math.max(1, total - 3));
+        adhkarFromInput.value = from;
+        adhkarToInput.value = Math.min(total, from + 2);
+        await loadAdhkarVerses();
+      }
+
+      if(state.verses.length === 0){
+        throw new Error('Aucun contenu chargé pour cette génération.');
+      }
+
+      const theme = THEMES[Math.floor(Math.random() * THEMES.length)];
+      state.arabicFont = theme.arabicFont;
+      state.translationFont = theme.translationFont;
+      state.arabicColor = theme.arabicColor;
+      state.translationColor = theme.translationColor;
+      state.accentColor = theme.accentColor;
+      setActiveMode(theme.bgMode);
+
+      state.format = opts.format || '9:16';
+      resizeCanvas();
+      await sleep(250); // laisse le canvas et le fond se stabiliser
+
+      ensureAudioGraph();
+      if(audioCtxRef && audioCtxRef.state === 'suspended') await audioCtxRef.resume();
+      narrationCaptureWarned = false;
+
+      const result = await recordCurrentFormat('Auto');
+      if(!result) throw new Error("La génération a échoué ou a été annulée.");
+
+      const tags = generateHashtags();
+      const base64 = await blobToBase64(result.blob);
+
+      return {
+        base64,
+        ext: result.ext,
+        filename: currentFilename(result.ext),
+        hashtags: tags.join(' '),
+        contentType: state.contentType,
+      };
+    }
+  };
 
 })();
 </script>

@@ -1,0 +1,13 @@
+{
+  "name": "quran-studio-automation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Génère automatiquement des vidéos Quran Studio chaque jour et les envoie vers Google Drive.",
+  "scripts": {
+    "start": "node automate.js"
+  },
+  "dependencies": {
+    "googleapis": "^140.0.1",
+    "playwright": "^1.47.0"
+  }
+}
