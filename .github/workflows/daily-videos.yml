@@ -1,0 +1,38 @@
+name: Génération quotidienne des vidéos Quran Studio
+
+on:
+  schedule:
+    # 6h00 UTC chaque jour. Ajustez selon votre fuseau horaire — par exemple
+    # pour 8h00 heure de Paris (UTC+2 en été), utilisez '0 6 * * *'.
+    - cron: '0 6 * * *'
+  workflow_dispatch: {}
+    # Permet aussi de lancer le job manuellement depuis l'onglet "Actions"
+    # du dépôt, pratique pour tester sans attendre le lendemain.
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Installer les dépendances
+        run: npm install
+
+      - name: Installer Chromium pour Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Générer les vidéos et les envoyer vers Google Drive
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          GOOGLE_SERVICE_ACCOUNT_JSON_BASE64: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON_BASE64 }}
+          DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
+        run: node automate.js
