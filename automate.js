@@ -18,6 +18,7 @@
 
 const { chromium } = require('playwright');
 const { google } = require('googleapis');
+const { Readable } = require('stream');
 const fs = require('fs');
 const path = require('path');
 
@@ -52,9 +53,10 @@ async function getDriveClient() {
 
 async function uploadToDrive(drive, filePath, mimeType, folderId) {
   const fileName = path.basename(filePath);
+  const buffer = fs.readFileSync(filePath);
   const res = await drive.files.create({
     requestBody: { name: fileName, parents: [folderId] },
-    media: { mimeType, body: fs.readFileSync(filePath) },
+    media: { mimeType, body: Readable.from(buffer) },
     fields: 'id, name, webViewLink',
   });
   return res.data;
