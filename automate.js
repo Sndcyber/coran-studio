@@ -90,11 +90,14 @@ async function main() {
   console.log('🌐 Ouverture de', APP_URL);
   const browser = await chromium.launch();
   const page = await browser.newPage();
-  await page.goto(APP_URL, { waitUntil: 'networkidle' });
+  await page.goto(APP_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
   // Attend que l'appli ait fini son chargement initial (sourates, récitateurs
-  // vérifiés, traductions...) avant de lancer la première génération.
-  await page.waitForFunction(() => window.__quranStudioReady === true, { timeout: 60000 });
+  // vérifiés, traductions...) avant de lancer la première génération. C'est
+  // le vrai signal de disponibilité — plus fiable que d'attendre un réseau
+  // "silencieux" (networkidle), qui ne se produit jamais vraiment tant que
+  // l'appli teste chaque récitateur en arrière-plan.
+  await page.waitForFunction(() => window.__quranStudioReady === true, { timeout: 90000 });
   console.log('✅ Application prête.');
 
   const count = randomInt(COUNT_MIN, COUNT_MAX);
