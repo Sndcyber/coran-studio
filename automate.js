@@ -10,9 +10,11 @@
 // tester avant de l'automatiser.
 //
 // Variables d'environnement requises :
-//   APP_URL                              URL de votre site Vercel déployé
-//   GOOGLE_SERVICE_ACCOUNT_JSON_BASE64    Clé JSON du compte de service Google, encodée en base64
-//   DRIVE_FOLDER_ID                       ID du dossier Drive de destination (partagé avec le compte de service)
+//   APP_URL                URL de votre site Vercel déployé
+//   GOOGLE_CLIENT_ID        Identifiant du client OAuth (voir get-refresh-token.js)
+//   GOOGLE_CLIENT_SECRET    Secret du client OAuth
+//   GOOGLE_REFRESH_TOKEN    Jeton de rafraîchissement obtenu une seule fois
+//   DRIVE_FOLDER_ID         ID du dossier Drive de destination
 //   VIDEO_COUNT_MIN (optionnel, défaut 3)
 //   VIDEO_COUNT_MAX (optionnel, défaut 5)
 
@@ -24,12 +26,14 @@ const path = require('path');
 
 const APP_URL = process.env.APP_URL;
 const FOLDER_ID = process.env.DRIVE_FOLDER_ID;
-const SA_JSON_BASE64 = process.env.GOOGLE_SERVICE_ACCOUNT_JSON_BASE64;
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const GOOGLE_REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN;
 const COUNT_MIN = parseInt(process.env.VIDEO_COUNT_MIN || '3', 10);
 const COUNT_MAX = parseInt(process.env.VIDEO_COUNT_MAX || '5', 10);
 
-if (!APP_URL || !FOLDER_ID || !SA_JSON_BASE64) {
-  console.error('❌ Variables manquantes : APP_URL, DRIVE_FOLDER_ID, GOOGLE_SERVICE_ACCOUNT_JSON_BASE64 doivent être définies.');
+if (!APP_URL || !FOLDER_ID || !GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GOOGLE_REFRESH_TOKEN) {
+  console.error('❌ Variables manquantes : APP_URL, DRIVE_FOLDER_ID, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN doivent être définies.');
   process.exit(1);
 }
 
@@ -42,13 +46,14 @@ function randomInt(min, max) {
 }
 
 async function getDriveClient() {
-  const credsJson = Buffer.from(SA_JSON_BASE64, 'base64').toString('utf8');
-  const credentials = JSON.parse(credsJson);
-  const auth = new google.auth.GoogleAuth({
-    credentials,
-    scopes: ['https://www.googleapis.com/auth/drive.file'],
-  });
-  return google.drive({ version: 'v3', auth });
+  // Authentification OAuth2 AU NOM DE L'UTILISATEUR (pas un compte de
+  // service) : les fichiers créés utilisent alors le quota de stockage
+  // personnel de l'utilisateur (15 Go gratuits), plutôt que le quota d'un
+  // compte de service qui est toujours de 0 Go sur un compte Gmail
+  // personnel (voir get-refresh-token.js pour obtenir le refresh token).
+  const oauth2Client = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
+  oauth2Client.setCredentials({ refresh_token: GOOGLE_REFRESH_TOKEN });
+  return google.drive({ version: 'v3', auth: oauth2Client });
 }
 
 async function uploadToDrive(drive, filePath, mimeType, folderId) {

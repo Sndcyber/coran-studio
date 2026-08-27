@@ -51,54 +51,84 @@ générer **automatiquement 3 à 5 vidéos par jour** (mélange Coran/Hadith/Adh
 récitateur et thème aléatoires) et les envoyer dans un dossier Google Drive
 — prêtes à récupérer sur votre téléphone pour Publer.
 
-## B1 — Créer le compte de service Google
+## B1 — Créer les identifiants OAuth Google
 
-1. [console.cloud.google.com](https://console.cloud.google.com) → créez un projet
+Contrairement à un compte de service (qui n'a aucun espace de stockage sur
+un compte Gmail personnel), on va autoriser le robot à agir **en votre
+nom**, avec votre propre espace Drive (15 Go gratuits).
+
+1. [console.cloud.google.com](https://console.cloud.google.com) → créez un projet (ou réutilisez-en un)
 2. Recherchez **"Google Drive API"** → **Activer**
-3. **API et services → Identifiants → Créer des identifiants → Compte de service**
-4. Nommez-le (ex: "quran-studio-bot") → **Créer et continuer** → **OK**
-5. Cliquez sur le compte créé → onglet **Clés** → **Ajouter une clé → Créer une clé** → format **JSON** → **Créer**
-6. Un fichier `.json` se télécharge — gardez-le précieusement
+3. Allez dans **API et services → Écran de consentement OAuth**
+   - Type d'utilisateur : **Externe** → **Créer**
+   - Nom de l'appli (au choix), email de support et email développeur : le vôtre
+   - Sur la page "Scopes", vous pouvez passer sans rien ajouter
+   - Sur la page "Utilisateurs de test", ajoutez votre propre adresse Gmail
+   - Une fois créé, retournez sur la page principale de l'écran de consentement
+     et cliquez **"Publier l'application"** (statut "En production") — ça reste
+     "non vérifiée par Google" et c'est très bien pour un usage personnel,
+     ça évite juste que l'autorisation expire au bout de 7 jours
+4. Allez dans **API et services → Identifiants → Créer des identifiants → ID client OAuth**
+   - Type d'application : **Application de bureau (Desktop app)**
+   - Nom au choix → **Créer**
+5. Notez le **Client ID** et le **Client Secret** affichés (vous en aurez besoin juste après)
 
-Notez l'adresse email du compte de service (visible sur sa page, du type
-`quran-studio-bot@votre-projet.iam.gserviceaccount.com`).
+## B2 — Obtenir votre jeton d'autorisation (une seule fois)
 
-## B2 — Créer et partager le dossier Google Drive
+Ce dépôt contient un petit outil (`get-refresh-token.js`) à lancer **une
+seule fois**, sur votre ordinateur ou dans Google Cloud Shell (bouton
+`>_` en haut de la console Google Cloud, aucune installation requise).
 
-1. Dans **votre** Google Drive, créez un dossier (ex: "Quran Studio — Vidéos automatiques")
-2. Clic droit → **Partager** → collez l'email du compte de service → rôle **Éditeur** → **Envoyer**
-3. Ouvrez le dossier, notez l'ID dans l'URL :
+1. Si vous utilisez Cloud Shell : cliquez sur `>_` en haut de
+   [console.cloud.google.com](https://console.cloud.google.com), puis
+   glissez-déposez le fichier `get-refresh-token.js` dans l'éditeur qui
+   s'ouvre (ou copiez-collez son contenu dans un nouveau fichier).
+   Si vous préférez votre ordinateur : assurez-vous d'avoir
+   [Node.js](https://nodejs.org) installé, et placez-vous dans ce dossier.
+
+2. Installez la dépendance nécessaire :
+   ```bash
+   npm install googleapis
+   ```
+
+3. Lancez l'outil avec votre Client ID et Client Secret de B1 :
+   ```bash
+   node get-refresh-token.js VOTRE_CLIENT_ID VOTRE_CLIENT_SECRET
+   ```
+
+4. Ouvrez le lien affiché dans un navigateur, connectez-vous avec le compte
+   Google dont vous voulez utiliser le Drive, acceptez l'autorisation
+   (l'avertissement "application non vérifiée" est normal, c'est votre
+   propre projet — cliquez "Paramètres avancés" puis "Accéder à... (non
+   sécurisé)")
+
+5. Le terminal affiche votre **refresh token** — copiez-le, vous en aurez
+   besoin à l'étape B3
+
+## B3 — Créer le dossier Google Drive
+
+1. Dans votre Drive, créez un dossier (ex: "Quran Studio — Vidéos automatiques")
+2. Ouvrez-le, notez l'ID dans l'URL :
    `https://drive.google.com/drive/folders/XXXXXXXXXXXXXXXXXXXX`
    (la partie `XXXXXXXXXXXXXXXXXXXX`)
 
-> ⚠️ Sans ce partage, le robot n'aura pas le droit d'écrire dans votre dossier.
+Pas besoin de le partager avec qui que ce soit cette fois — le robot agit
+directement en votre nom.
 
-## B3 — Ajouter les secrets sur le dépôt GitHub
+## B4 — Ajouter les secrets sur le dépôt GitHub
 
-Dans votre dépôt (le même que la Partie A2) : **Settings → Secrets and
-variables → Actions → New repository secret**. Ajoutez ces trois secrets :
+Dans votre dépôt : **Settings → Secrets and variables → Actions → New
+repository secret**. Ajoutez ces cinq secrets :
 
 | Nom du secret | Valeur |
 |---|---|
-| `APP_URL` | L'URL de votre site Vercel notée en A2 (ex: `https://quran-studio-xxxx.vercel.app`) |
-| `DRIVE_FOLDER_ID` | L'ID du dossier noté en B2 |
-| `GOOGLE_SERVICE_ACCOUNT_JSON_BASE64` | Le fichier JSON de B1, encodé en base64 (voir ci-dessous) |
+| `APP_URL` | L'URL de votre site Vercel (ex: `https://quran-studio-xxxx.vercel.app`) |
+| `GOOGLE_CLIENT_ID` | Le Client ID de B1 |
+| `GOOGLE_CLIENT_SECRET` | Le Client Secret de B1 |
+| `GOOGLE_REFRESH_TOKEN` | Le refresh token obtenu en B2 |
+| `DRIVE_FOLDER_ID` | L'ID du dossier noté en B3 |
 
-### Encoder le fichier JSON en base64
-
-Mac/Linux (Terminal) :
-```bash
-base64 -i chemin/vers/le-fichier.json | tr -d '\n'
-```
-
-Windows (PowerShell) :
-```powershell
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("chemin\vers\le-fichier.json"))
-```
-
-Copiez tout le résultat et collez-le comme valeur du secret.
-
-## B4 — Tester manuellement
+## B5 — Tester manuellement
 
 1. Onglet **Actions** de votre dépôt GitHub
 2. Cliquez **"Génération quotidienne des vidéos Quran Studio"** à gauche
@@ -108,7 +138,7 @@ Copiez tout le résultat et collez-le comme valeur du secret.
 
 Si ❌ rouge, cliquez sur le job pour voir les logs en français, ils expliquent où ça coince.
 
-## B5 — C'est automatique !
+## B6 — C'est automatique !
 
 Le workflow se déclenche **tout seul chaque jour à 6h00 UTC**. Pour changer
 l'heure, éditez la ligne `cron:` dans `.github/workflows/daily-videos.yml`
