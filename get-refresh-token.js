@@ -45,11 +45,33 @@ console.log(`En attente de l'autorisation sur ${REDIRECT_URI} ...\n`);
 const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, REDIRECT_URI);
-    const code = url.searchParams.get('code');
-    if (!code) {
-      res.end('Aucun code reçu — réessayez.');
+
+    // Ignore les requêtes parasites du navigateur (favicon.ico, etc.) —
+    // seule la requête sur "/" avec un paramètre "code" ou "error" nous
+    // intéresse. Sans ce filtre, ces requêtes annexes peuvent déclencher
+    // le message "Aucun code reçu" par erreur.
+    if (url.pathname !== '/') {
+      res.statusCode = 404;
+      res.end();
       return;
     }
+
+    const error = url.searchParams.get('error');
+    if (error) {
+      res.end(`Autorisation refusée par Google : ${error}. Fermez cet onglet et relancez le script.`);
+      console.log(`\n❌ Google a renvoyé une erreur : ${error}`);
+      console.log('   Relancez le script et acceptez bien l\'autorisation cette fois.\n');
+      server.close();
+      process.exit(1);
+    }
+
+    const code = url.searchParams.get('code');
+    if (!code) {
+      console.log('   (requête reçue sans code ni erreur, ignorée — URL complète :', req.url, ')');
+      res.end('Aucun code reçu — laissez cette page ouverte et réessayez depuis le lien du terminal.');
+      return; // ne ferme pas le serveur, on attend la vraie requête
+    }
+
     res.end('✅ Autorisation réussie ! Vous pouvez fermer cet onglet et retourner au terminal.');
     server.close();
 
